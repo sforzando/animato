@@ -1,0 +1,6 @@
+ofxDatGui
+ofxOsc
+ofxPhoto
+ofxPostProcessing
+ofxQRCodeGenerator
+ofxXmlSettings
