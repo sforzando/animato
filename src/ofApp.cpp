@@ -8,7 +8,7 @@ void ofApp::setup()
   windowRectangle.setSize(ofGetWidth(), ofGetHeight());
   gifRectangle.setSize(1080, 1080);
   previewRectangle.setSize(ofGetHeight(), ofGetHeight());
-  photoRectangle.setSize(360, 360);
+  pictureRectangle.setSize(360, 360);
 
   gui = new ofxDatGui(ofxDatGuiAnchor::TOP_RIGHT);
   gui->setTheme(new ofxDatGuiCustomFontSize);
@@ -29,14 +29,14 @@ void ofApp::update()
     picturePixel = photo.capture();
     pictureImage.clear();
     pictureImage.setFromPixels(picturePixel, photo.getCaptureWidth(), photo.getCaptureHeight(), OF_IMAGE_COLOR, 0);
-    pictureImage.resize(photoRectangle.width, photoRectangle.height);
+    pictureImage.resize(pictureRectangle.width, pictureRectangle.height);
     ofLog(OF_LOG_NOTICE, "Photo loading finished.");
     isPhotoLoaded = true;
   } else { }
   if (isPhotoLoaded) {
     fbo.begin();
     getBackground().drawFaces();
-    pictureImage.draw(gifRectangle.width - photoRectangle.width, gifRectangle.height - photoRectangle.height, photoRectangle.width, photoRectangle.height);
+    pictureImage.draw(gifRectangle.width - pictureRectangle.width, gifRectangle.height - pictureRectangle.height, pictureRectangle.width, pictureRectangle.height);
     fbo.end();
   }
 }
@@ -93,6 +93,7 @@ void ofApp::windowResized(int w, int h)
   ofLog(OF_LOG_NOTICE, "windowResized()");
   gui->setWidth(ofGetWidth() - ofGetHeight());
   windowRectangle.setSize(ofGetWidth(), ofGetHeight());
+  previewRectangle.setSize(windowRectangle.height, windowRectangle.height);
 }
 
 void ofApp::dragEvent(ofDragInfo dragInfo)
@@ -122,14 +123,14 @@ ofVboMesh ofApp::getBackground()
     backgroundMesh.addColor(keyColor);
 
     // PICTURE-LEFT
-    for (int y = 0; y < photoRectangle.height; y++) {
-      backgroundMesh.addVertex(ofPoint(gifRectangle.width - photoRectangle.width, gifRectangle.height - y, 0));
-      backgroundMesh.addColor(pictureImage.getColor(0, photoRectangle.height - y));
+    for (int y = 0; y <= pictureRectangle.height; y++) {
+      backgroundMesh.addVertex(ofPoint(gifRectangle.width - pictureRectangle.width, gifRectangle.height - y, 0));
+      backgroundMesh.addColor(pictureImage.getColor(0, pictureRectangle.height - y));
     }
 
     // PICTURE-TOP
-    for (int x = 0; x < photoRectangle.width; x++) {
-      backgroundMesh.addVertex(ofPoint(gifRectangle.width - photoRectangle.width + x, gifRectangle.height - photoRectangle.height, 0));
+    for (int x = 0; x <= pictureRectangle.width; x++) {
+      backgroundMesh.addVertex(ofPoint(gifRectangle.width - pictureRectangle.width + x, gifRectangle.height - pictureRectangle.height, 0));
       backgroundMesh.addColor(pictureImage.getColor(x, 0));
     }
 
@@ -156,7 +157,10 @@ void ofApp::capture()
   isBackgroundGenerated = false;
   backgroundMesh.clear();
   photo.exit();
+  ofLog(OF_LOG_NOTICE, ofSystem("killall PTPCamera"));
   photo.init();
+  ofLog(OF_LOG_NOTICE, ofSystem("/usr/local/bin/gphoto2 --auto-detect"));
+  ofLog(OF_LOG_VERBOSE, ofSystem("/usr/local/bin/gphoto2 --debug --summary"));
   if (photo.isBusy()) {
     ofLog(OF_LOG_WARNING, "Camera is busy.");
   } else {

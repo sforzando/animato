@@ -32,7 +32,7 @@ public:
   ofRectangle windowRectangle;
   ofRectangle gifRectangle;
   ofRectangle previewRectangle;
-  ofRectangle photoRectangle;
+  ofRectangle pictureRectangle;
 
   bool isPhotoLoaded = false;
   bool isBackgroundGenerated = false;
