@@ -171,6 +171,70 @@
 				<key>sourceTree</key>
 				<string>SOURCE_ROOT</string>
 			</dict>
+			<key>EC26F225D807F4F069405924</key>
+			<dict>
+				<key>fileRef</key>
+				<string>45B576A8B106CBE71564781C</string>
+				<key>isa</key>
+				<string>PBXBuildFile</string>
+			</dict>
+			<key>45B576A8B106CBE71564781C</key>
+			<dict>
+				<key>explicitFileType</key>
+				<string>sourcecode.cpp.cpp</string>
+				<key>fileEncoding</key>
+				<string>30</string>
+				<key>isa</key>
+				<string>PBXFileReference</string>
+				<key>name</key>
+				<string>ofxThreadedImageLoader.cpp</string>
+				<key>path</key>
+				<string>../../../addons/ofxThreadedImageLoader/src/ofxThreadedImageLoader.cpp</string>
+				<key>sourceTree</key>
+				<string>SOURCE_ROOT</string>
+			</dict>
+			<key>F7347CBF7C47F1110E5FA42A</key>
+			<dict>
+				<key>children</key>
+				<array>
+					<string>258BD733949A19E1F0702FFA</string>
+					<string>45B576A8B106CBE71564781C</string>
+				</array>
+				<key>isa</key>
+				<string>PBXGroup</string>
+				<key>name</key>
+				<string>src</string>
+				<key>sourceTree</key>
+				<string>&lt;group&gt;</string>
+			</dict>
+			<key>3CD2B0AEE6FE628A91175CDA</key>
+			<dict>
+				<key>children</key>
+				<array>
+					<string>F7347CBF7C47F1110E5FA42A</string>
+				</array>
+				<key>isa</key>
+				<string>PBXGroup</string>
+				<key>name</key>
+				<string>ofxThreadedImageLoader</string>
+				<key>sourceTree</key>
+				<string>&lt;group&gt;</string>
+			</dict>
+			<key>258BD733949A19E1F0702FFA</key>
+			<dict>
+				<key>explicitFileType</key>
+				<string>sourcecode.c.h</string>
+				<key>fileEncoding</key>
+				<string>30</string>
+				<key>isa</key>
+				<string>PBXFileReference</string>
+				<key>name</key>
+				<string>ofxThreadedImageLoader.h</string>
+				<key>path</key>
+				<string>../../../addons/ofxThreadedImageLoader/src/ofxThreadedImageLoader.h</string>
+				<key>sourceTree</key>
+				<string>SOURCE_ROOT</string>
+			</dict>
 			<key>656037BDB41511A1A408660F</key>
 			<dict>
 				<key>fileRef</key>
@@ -2992,6 +3056,21 @@
 				<key>sourceTree</key>
 				<string>SOURCE_ROOT</string>
 			</dict>
+			<key>A2773BE5114F0A453912D7FA</key>
+			<dict>
+				<key>explicitFileType</key>
+				<string>sourcecode.c.h</string>
+				<key>fileEncoding</key>
+				<string>30</string>
+				<key>isa</key>
+				<string>PBXFileReference</string>
+				<key>name</key>
+				<string>ofxDatGuiCustomFontSize.h</string>
+				<key>path</key>
+				<string>src/ofxDatGuiCustomFontSize.h</string>
+				<key>sourceTree</key>
+				<string>SOURCE_ROOT</string>
+			</dict>
 			<key>6948EE371B920CB800B5AC1A</key>
 			<dict>
 				<key>children</key>
@@ -3012,6 +3091,7 @@
 					<string>128E58F256206D0DD4640BB1</string>
 					<string>BD52EC6DCE402D90869A80A1</string>
 					<string>7375F20302429A3CD542ADDF</string>
+					<string>3CD2B0AEE6FE628A91175CDA</string>
 					<string>1F4FB5C423662B96ADFDCC0B</string>
 				</array>
 				<key>isa</key>
@@ -3166,6 +3246,7 @@
 					<key>HEADER_SEARCH_PATHS</key>
 					<array>
 						<string>$(OF_CORE_HEADERS)</string>
+						<string>src</string>
 						<string>../../../addons/ofxDatGui/src</string>
 						<string>../../../addons/ofxDatGui/src/components</string>
 						<string>../../../addons/ofxDatGui/src/core</string>
@@ -3191,6 +3272,7 @@
 						<string>../../../addons/ofxQRCodeGenerator/libs/qrencode</string>
 						<string>../../../addons/ofxQRCodeGenerator/libs/qrencode/include</string>
 						<string>../../../addons/ofxQRCodeGenerator/src</string>
+						<string>../../../addons/ofxThreadedImageLoader/src</string>
 						<string>../../../addons/ofxXmlSettings/libs</string>
 						<string>../../../addons/ofxXmlSettings/src</string>
 					</array>
@@ -3250,6 +3332,7 @@
 					<key>HEADER_SEARCH_PATHS</key>
 					<array>
 						<string>$(OF_CORE_HEADERS)</string>
+						<string>src</string>
 						<string>../../../addons/ofxDatGui/src</string>
 						<string>../../../addons/ofxDatGui/src/components</string>
 						<string>../../../addons/ofxDatGui/src/core</string>
@@ -3275,6 +3358,7 @@
 						<string>../../../addons/ofxQRCodeGenerator/libs/qrencode</string>
 						<string>../../../addons/ofxQRCodeGenerator/libs/qrencode/include</string>
 						<string>../../../addons/ofxQRCodeGenerator/src</string>
+						<string>../../../addons/ofxThreadedImageLoader/src</string>
 						<string>../../../addons/ofxXmlSettings/libs</string>
 						<string>../../../addons/ofxXmlSettings/src</string>
 					</array>
@@ -3378,6 +3462,7 @@
 					<string>F2FD03EF0BCBD7E685E31E15</string>
 					<string>2EA50482394A2F17B6E7D96D</string>
 					<string>656037BDB41511A1A408660F</string>
+					<string>EC26F225D807F4F069405924</string>
 					<string>63B57AC5BF4EF088491E0317</string>
 					<string>5A4349E9754D6FA14C0F2A3A</string>
 					<string>9D44DC88EF9E7991B4A09951</string>
@@ -3465,6 +3550,7 @@
 					<key>HEADER_SEARCH_PATHS</key>
 					<array>
 						<string>$(OF_CORE_HEADERS)</string>
+						<string>src</string>
 						<string>../../../addons/ofxDatGui/src</string>
 						<string>../../../addons/ofxDatGui/src/components</string>
 						<string>../../../addons/ofxDatGui/src/core</string>
@@ -3490,6 +3576,7 @@
 						<string>../../../addons/ofxQRCodeGenerator/libs/qrencode</string>
 						<string>../../../addons/ofxQRCodeGenerator/libs/qrencode/include</string>
 						<string>../../../addons/ofxQRCodeGenerator/src</string>
+						<string>../../../addons/ofxThreadedImageLoader/src</string>
 						<string>../../../addons/ofxXmlSettings/libs</string>
 						<string>../../../addons/ofxXmlSettings/src</string>
 					</array>
@@ -3539,6 +3626,7 @@
 					<key>HEADER_SEARCH_PATHS</key>
 					<array>
 						<string>$(OF_CORE_HEADERS)</string>
+						<string>src</string>
 						<string>../../../addons/ofxDatGui/src</string>
 						<string>../../../addons/ofxDatGui/src/components</string>
 						<string>../../../addons/ofxDatGui/src/core</string>
@@ -3564,6 +3652,7 @@
 						<string>../../../addons/ofxQRCodeGenerator/libs/qrencode</string>
 						<string>../../../addons/ofxQRCodeGenerator/libs/qrencode/include</string>
 						<string>../../../addons/ofxQRCodeGenerator/src</string>
+						<string>../../../addons/ofxThreadedImageLoader/src</string>
 						<string>../../../addons/ofxXmlSettings/libs</string>
 						<string>../../../addons/ofxXmlSettings/src</string>
 					</array>
@@ -3611,6 +3700,7 @@
 					<string>E4B69E1D0A3A1BDC003C02F2</string>
 					<string>E4B69E1E0A3A1BDC003C02F2</string>
 					<string>E4B69E1F0A3A1BDC003C02F2</string>
+					<string>A2773BE5114F0A453912D7FA</string>
 				</array>
 				<key>isa</key>
 				<string>PBXGroup</string>
