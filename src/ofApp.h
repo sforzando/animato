@@ -21,10 +21,6 @@ public:
   void windowResized(int w, int h);
   void dragEvent(ofDragInfo dragInfo);
   void gotMessage(ofMessage msg);
-  void onButtonCapture(ofxDatGuiButtonEvent e);
   
-  ofxDatGui *gui;
-  ofxDatGuiButton *buttonCapture;
+  ofxDatGui * gui;
 };
-
-

@@ -3,4 +3,5 @@ ofxOsc
 ofxPhoto
 ofxPostProcessing
 ofxQRCodeGenerator
+ofxThreadedImageLoader
 ofxXmlSettings
