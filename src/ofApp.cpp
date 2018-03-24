@@ -8,16 +8,17 @@ void ofApp::setup()
   windowRectangle.setSize(ofGetWidth(), ofGetHeight());
   gifRectangle.setSize(1080, 1080);
   previewRectangle.setSize(ofGetHeight(), ofGetHeight());
-  photoRectangle.setSize(360, 360);
+  pictureRectangle.setSize(360, 360);
 
   gui = new ofxDatGui(ofxDatGuiAnchor::TOP_RIGHT);
   gui->setTheme(new ofxDatGuiCustomFontSize);
-  buttonCapture = gui->addButton("[C]apture");
-  buttonCapture->setLabelAlignment(ofxDatGuiAlignment::CENTER);
-  buttonCapture->onButtonEvent(this, &ofApp::onButtonCapture);
+  captureButton = gui->addButton("[C]apture");
+  captureButton->setLabelAlignment(ofxDatGuiAlignment::CENTER);
+  captureButton->onButtonEvent(this, &ofApp::onCaptureButton);
   gui->addFRM();
 
   fbo.allocate(gifRectangle.width, gifRectangle.height, GL_RGBA32F_ARB);
+  backgroundMesh.setMode(OF_PRIMITIVE_TRIANGLE_FAN);
 
   photo.init();
 }
@@ -25,15 +26,19 @@ void ofApp::setup()
 void ofApp::update()
 {
   if (photo.captureSucceeded()) {
-    pixelPicture = photo.capture();
-    imagePicture.clear();
-    imagePicture.setFromPixels(pixelPicture, photo.getCaptureWidth(), photo.getCaptureHeight(), OF_IMAGE_COLOR, 0);
+    picturePixel = photo.capture();
+    pictureImage.clear();
+    pictureImage.setFromPixels(picturePixel, photo.getCaptureWidth(), photo.getCaptureHeight(), OF_IMAGE_COLOR, 0);
+    pictureImage.resize(pictureRectangle.width, pictureRectangle.height);
     ofLog(OF_LOG_NOTICE, "Photo loading finished.");
-
-    fbo.begin();
-    imagePicture.draw(gifRectangle.width - photoRectangle.width, gifRectangle.height - photoRectangle.height, photoRectangle.width, photoRectangle.height);
-    fbo.end();
+    isPhotoLoaded = true;
   } else { }
+  if (isPhotoLoaded) {
+    fbo.begin();
+    getBackground().drawFaces();
+    pictureImage.draw(gifRectangle.width - pictureRectangle.width, gifRectangle.height - pictureRectangle.height, pictureRectangle.width, pictureRectangle.height);
+    fbo.end();
+  }
 }
 
 void ofApp::draw()
@@ -88,6 +93,7 @@ void ofApp::windowResized(int w, int h)
   ofLog(OF_LOG_NOTICE, "windowResized()");
   gui->setWidth(ofGetWidth() - ofGetHeight());
   windowRectangle.setSize(ofGetWidth(), ofGetHeight());
+  previewRectangle.setSize(windowRectangle.height, windowRectangle.height);
 }
 
 void ofApp::dragEvent(ofDragInfo dragInfo)
@@ -104,17 +110,57 @@ void ofApp::exit()
   photo.exit();
 }
 
-void ofApp::onButtonCapture(ofxDatGuiButtonEvent e)
+ofVboMesh ofApp::getBackground()
 {
-  ofLog(OF_LOG_NOTICE, "onButtonCapture()");
+  if (!isBackgroundGenerated) {
+    // origin: TOP-LEFT
+    backgroundMesh.addVertex(ofPoint(0, 0, 0));
+    backgroundMesh.addColor(keyColor);
+
+
+    // BOTTOM-LEFT
+    backgroundMesh.addVertex(ofPoint(0, gifRectangle.height, 0));
+    backgroundMesh.addColor(keyColor);
+
+    // PICTURE-LEFT
+    for (int y = 0; y <= pictureRectangle.height; y++) {
+      backgroundMesh.addVertex(ofPoint(gifRectangle.width - pictureRectangle.width, gifRectangle.height - y, 0));
+      backgroundMesh.addColor(pictureImage.getColor(0, pictureRectangle.height - y));
+    }
+
+    // PICTURE-TOP
+    for (int x = 0; x <= pictureRectangle.width; x++) {
+      backgroundMesh.addVertex(ofPoint(gifRectangle.width - pictureRectangle.width + x, gifRectangle.height - pictureRectangle.height, 0));
+      backgroundMesh.addColor(pictureImage.getColor(x, 0));
+    }
+
+    // TOP-RIGHT
+    backgroundMesh.addVertex(ofPoint(gifRectangle.width, 0, 0));
+    backgroundMesh.addColor(keyColor);
+
+    isBackgroundGenerated = true;
+  }
+
+  return backgroundMesh;
+}
+
+void ofApp::onCaptureButton(ofxDatGuiButtonEvent e)
+{
+  ofLog(OF_LOG_NOTICE, "onCaptureButton()");
   capture();
 }
 
 void ofApp::capture()
 {
   ofLog(OF_LOG_NOTICE, "capture()");
+  isPhotoLoaded         = false;
+  isBackgroundGenerated = false;
+  backgroundMesh.clear();
   photo.exit();
+  ofLog(OF_LOG_NOTICE, ofSystem("killall PTPCamera"));
   photo.init();
+  ofLog(OF_LOG_NOTICE, ofSystem("/usr/local/bin/gphoto2 --auto-detect"));
+  ofLog(OF_LOG_VERBOSE, ofSystem("/usr/local/bin/gphoto2 --debug --summary"));
   if (photo.isBusy()) {
     ofLog(OF_LOG_WARNING, "Camera is busy.");
   } else {
