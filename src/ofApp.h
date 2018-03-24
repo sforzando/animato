@@ -2,6 +2,7 @@
 
 #include "ofMain.h"
 #include "ofxDatGui.h"
+#include "ofxDatGuiCustomFontSize.h"
 
 class ofApp : public ofBaseApp {
 public:
@@ -20,8 +21,10 @@ public:
   void windowResized(int w, int h);
   void dragEvent(ofDragInfo dragInfo);
   void gotMessage(ofMessage msg);
+  void onButtonCapture(ofxDatGuiButtonEvent e);
   
-  ofxDatGui* gui;
+  ofxDatGui *gui;
+  ofxDatGuiButton *buttonCapture;
 };
 
 

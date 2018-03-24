@@ -3,14 +3,21 @@
 // --------------------------------------------------------------
 void ofApp::setup()
 {
+  ofSetWindowTitle("animato");
+  ofSetVerticalSync(true);
+  ofEnableAlphaBlending();
+
   gui = new ofxDatGui(ofxDatGuiAnchor::TOP_LEFT);
-  gui->setTheme(new ofxDatGuiThemeWireframe());
+  gui->setTheme(new ofxDatGuiCustomFontSize());
   gui->addHeader(":: animato ::");
-  gui->addButton("Capture");
+  buttonCapture = gui->addButton("Capture");
+  buttonCapture->onButtonEvent(this, &ofApp::onButtonCapture);
   gui->addMatrix("UPPER", 9);
   gui->addMatrix("LOWER", 9);
   gui->addFRM();
 }
+
+void ofApp::onButtonCapture(ofxDatGuiButtonEvent e) {}
 
 // --------------------------------------------------------------
 void ofApp::update()
@@ -76,5 +83,3 @@ void ofApp::gotMessage(ofMessage msg)
 void ofApp::dragEvent(ofDragInfo dragInfo)
 {
 }
-
-
