@@ -14,3 +14,9 @@
 * FFmpeg
   * to encode GIF
   * `brew install ffmpeg`
+
+## Command
+### gphoto2
+`gphoto2 --auto-detect`
+`sudo env LANG=C gphoto2 --summary`
+`killall PTPCamera`

@@ -39,6 +39,7 @@ void ofApp::draw()
 
 void ofApp::keyPressed(int key)
 {
+  ofLogNotice() << "keyPressed(): " << key;
   switch (key) {
     case 'c':
       capture();
@@ -50,6 +51,7 @@ void ofApp::keyPressed(int key)
 
 void ofApp::keyReleased(int key)
 {
+  ofLogNotice() << "keyReleased(): " << key;
 }
 
 void ofApp::mouseMoved(int x, int y)
@@ -86,6 +88,7 @@ void ofApp::dragEvent(ofDragInfo dragInfo)
 
 void ofApp::gotMessage(ofMessage msg)
 {
+  ofLog() << msg;
 }
 
 void ofApp::exit()
