@@ -12,12 +12,13 @@ void ofApp::setup()
 
   gui = new ofxDatGui(ofxDatGuiAnchor::TOP_RIGHT);
   gui->setTheme(new ofxDatGuiCustomFontSize);
-  buttonCapture = gui->addButton("[C]apture");
-  buttonCapture->setLabelAlignment(ofxDatGuiAlignment::CENTER);
-  buttonCapture->onButtonEvent(this, &ofApp::onButtonCapture);
+  captureButton = gui->addButton("[C]apture");
+  captureButton->setLabelAlignment(ofxDatGuiAlignment::CENTER);
+  captureButton->onButtonEvent(this, &ofApp::onCaptureButton);
   gui->addFRM();
 
   fbo.allocate(gifRectangle.width, gifRectangle.height, GL_RGBA32F_ARB);
+  backgroundMesh.setMode(OF_PRIMITIVE_TRIANGLE_FAN);
 
   photo.init();
 }
@@ -25,15 +26,18 @@ void ofApp::setup()
 void ofApp::update()
 {
   if (photo.captureSucceeded()) {
-    pixelPicture = photo.capture();
-    imagePicture.clear();
-    imagePicture.setFromPixels(pixelPicture, photo.getCaptureWidth(), photo.getCaptureHeight(), OF_IMAGE_COLOR, 0);
+    picturePixel = photo.capture();
+    pictureImage.clear();
+    pictureImage.setFromPixels(picturePixel, photo.getCaptureWidth(), photo.getCaptureHeight(), OF_IMAGE_COLOR, 0);
     ofLog(OF_LOG_NOTICE, "Photo loading finished.");
-
-    fbo.begin();
-    imagePicture.draw(gifRectangle.width - photoRectangle.width, gifRectangle.height - photoRectangle.height, photoRectangle.width, photoRectangle.height);
-    fbo.end();
+    isPhotoLoaded = true;
   } else { }
+  if (isPhotoLoaded) {
+    fbo.begin();
+    getBackground().drawFaces();
+    pictureImage.draw(gifRectangle.width - photoRectangle.width, gifRectangle.height - photoRectangle.height, photoRectangle.width, photoRectangle.height);
+    fbo.end();
+  }
 }
 
 void ofApp::draw()
@@ -104,15 +108,47 @@ void ofApp::exit()
   photo.exit();
 }
 
-void ofApp::onButtonCapture(ofxDatGuiButtonEvent e)
+ofMesh ofApp::getBackground()
 {
-  ofLog(OF_LOG_NOTICE, "onButtonCapture()");
+  if (!isBackgroundGenerated) {
+    backgroundMesh.addVertex(ofPoint(gifRectangle.width - photoRectangle.width, gifRectangle.height - photoRectangle.height, 0));
+    backgroundMesh.addColor(pictureImage.getColor(0, 0));
+
+    backgroundMesh.addVertex(ofPoint(gifRectangle.width - photoRectangle.width, gifRectangle.height, 0));
+    backgroundMesh.addColor(pictureImage.getColor(0, pictureImage.getHeight() - 1));
+    backgroundMesh.addVertex(ofPoint(0, gifRectangle.height, 0));
+    backgroundMesh.addColor(keyColor);
+
+    backgroundMesh.addVertex(ofPoint(0, gifRectangle.height, 0));
+    backgroundMesh.addColor(keyColor);
+    backgroundMesh.addVertex(ofPoint(0, 0, 0));
+    backgroundMesh.addColor(keyColor);
+
+    backgroundMesh.addVertex(ofPoint(0, 0, 0));
+    backgroundMesh.addColor(keyColor);
+    backgroundMesh.addVertex(ofPoint(gifRectangle.getWidth(), 0, 0));
+    backgroundMesh.addColor(keyColor);
+
+    backgroundMesh.addVertex(ofPoint(gifRectangle.width, 0, 0));
+    backgroundMesh.addColor(keyColor);
+    backgroundMesh.addVertex(ofPoint(gifRectangle.width, gifRectangle.height - photoRectangle.height, 0));
+    backgroundMesh.addColor(keyColor);
+  }
+
+  return backgroundMesh;
+}
+
+void ofApp::onCaptureButton(ofxDatGuiButtonEvent e)
+{
+  ofLog(OF_LOG_NOTICE, "onCaptureButton()");
   capture();
 }
 
 void ofApp::capture()
 {
   ofLog(OF_LOG_NOTICE, "capture()");
+  isBackgroundGenerated = false;
+  backgroundMesh.clear();
   photo.exit();
   photo.init();
   if (photo.isBusy()) {

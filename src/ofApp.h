@@ -23,21 +23,29 @@ public:
   void dragEvent(ofDragInfo dragInfo);
   void gotMessage(ofMessage msg);
   void exit();
-  
-  void onButtonCapture(ofxDatGuiButtonEvent e);
-  
+
+  ofMesh getBackground();
+  void onCaptureButton(ofxDatGuiButtonEvent e);
+
   void capture();
-  
+
   ofRectangle windowRectangle;
   ofRectangle gifRectangle;
   ofRectangle previewRectangle;
   ofRectangle photoRectangle;
+
+  bool isPhotoLoaded = false;
+  bool isBackgroundGenerated = false;
+
+  ofColor keyColor = ofColor::fromHex(0xffd1cd);
+  ofMesh backgroundMesh;
+
   ofxDatGui * gui;
-  ofxDatGuiButton *buttonCapture;
-  
+  ofxDatGuiButton *captureButton;
+
   ofFbo fbo;
-  
+
   ofxPhoto photo;
-  unsigned char *pixelPicture;
-  ofImage imagePicture;
+  unsigned char *picturePixel;
+  ofImage pictureImage;
 };
