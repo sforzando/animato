@@ -3,6 +3,13 @@
 // --------------------------------------------------------------
 void ofApp::setup()
 {
+  gui = new ofxDatGui(ofxDatGuiAnchor::TOP_LEFT);
+  gui->setTheme(new ofxDatGuiThemeWireframe());
+  gui->addHeader(":: animato ::");
+  gui->addButton("Capture");
+  gui->addMatrix("UPPER", 9);
+  gui->addMatrix("LOWER", 9);
+  gui->addFRM();
 }
 
 // --------------------------------------------------------------
