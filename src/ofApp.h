@@ -22,6 +22,7 @@ public:
   void windowResized(int w, int h);
   void dragEvent(ofDragInfo dragInfo);
   void gotMessage(ofMessage msg);
+  void exit();
   
   void onButtonCapture(ofxDatGuiButtonEvent e);
   
@@ -33,7 +34,6 @@ public:
   ofFbo fbo;
   
   ofxPhoto photo;
-  bool isCameraBusy;
   unsigned char *pixelPicture;
   ofImage imagePicture;
 };

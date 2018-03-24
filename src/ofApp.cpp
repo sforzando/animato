@@ -6,7 +6,7 @@ void ofApp::setup()
   ofSetVerticalSync(true);
   ofEnableAlphaBlending();
 
-  gui = new ofxDatGui(1080, 0);
+  gui = new ofxDatGui(ofGetHeight(), 0);
   gui->setTheme(new ofxDatGuiCustomFontSize);
   buttonCapture = gui->addButton("[C]apture");
   buttonCapture->setLabelAlignment(ofxDatGuiAlignment::CENTER);
@@ -16,28 +16,36 @@ void ofApp::setup()
   fbo.allocate(1080, 1080, GL_RGBA32F_ARB);
 
   photo.init();
-  isCameraBusy = false;
 }
 
 void ofApp::update()
 {
   if (photo.captureSucceeded()) {
     pixelPicture = photo.capture();
+    imagePicture.clear();
     imagePicture.setFromPixels(pixelPicture, photo.getCaptureWidth(), photo.getCaptureHeight(), OF_IMAGE_COLOR, 0);
     ofLog(OF_LOG_NOTICE, "Photo loading finished.");
-  }
-  fbo.begin();
-  imagePicture.draw(0, 0);
-  fbo.end();
+
+    fbo.begin();
+    imagePicture.draw(1080 - 360, 1080 - 360, 360, 360);
+    fbo.end();
+  } else { }
 }
 
 void ofApp::draw()
 {
-  fbo.draw(0, 0);
+  fbo.draw(0, 0, ofGetHeight(), ofGetHeight());
 }
 
 void ofApp::keyPressed(int key)
 {
+  switch (key) {
+    case 'c':
+      capture();
+      break;
+    default:
+      break;
+  }
 }
 
 void ofApp::keyReleased(int key)
@@ -80,6 +88,11 @@ void ofApp::gotMessage(ofMessage msg)
 {
 }
 
+void ofApp::exit()
+{
+  photo.exit();
+}
+
 void ofApp::onButtonCapture(ofxDatGuiButtonEvent e)
 {
   ofLog(OF_LOG_NOTICE, "onButtonCapture()");
@@ -89,11 +102,11 @@ void ofApp::onButtonCapture(ofxDatGuiButtonEvent e)
 void ofApp::capture()
 {
   ofLog(OF_LOG_NOTICE, "capture()");
-  if (isCameraBusy) {
+  photo.exit();
+  photo.init();
+  if (photo.isBusy()) {
     ofLog(OF_LOG_WARNING, "Camera is busy.");
   } else {
     photo.startCapture();
   }
 }
-
-
