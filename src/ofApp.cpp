@@ -5,15 +5,19 @@ void ofApp::setup()
   ofSetWindowTitle("animato");
   ofSetVerticalSync(true);
   ofEnableAlphaBlending();
+  windowRectangle.setSize(ofGetWidth(), ofGetHeight());
+  gifRectangle.setSize(1080, 1080);
+  previewRectangle.setSize(ofGetHeight(), ofGetHeight());
+  photoRectangle.setSize(360, 360);
 
-  gui = new ofxDatGui(ofGetHeight(), 0);
+  gui = new ofxDatGui(ofxDatGuiAnchor::TOP_RIGHT);
   gui->setTheme(new ofxDatGuiCustomFontSize);
   buttonCapture = gui->addButton("[C]apture");
   buttonCapture->setLabelAlignment(ofxDatGuiAlignment::CENTER);
   buttonCapture->onButtonEvent(this, &ofApp::onButtonCapture);
   gui->addFRM();
 
-  fbo.allocate(1080, 1080, GL_RGBA32F_ARB);
+  fbo.allocate(gifRectangle.width, gifRectangle.height, GL_RGBA32F_ARB);
 
   photo.init();
 }
@@ -27,19 +31,20 @@ void ofApp::update()
     ofLog(OF_LOG_NOTICE, "Photo loading finished.");
 
     fbo.begin();
-    imagePicture.draw(1080 - 360, 1080 - 360, 360, 360);
+    imagePicture.draw(gifRectangle.width - photoRectangle.width, gifRectangle.height - photoRectangle.height, photoRectangle.width, photoRectangle.height);
     fbo.end();
   } else { }
 }
 
 void ofApp::draw()
 {
-  fbo.draw(0, 0, ofGetHeight(), ofGetHeight());
+  ofBackgroundHex(0x000000);
+  fbo.draw(0, 0, previewRectangle.width, previewRectangle.height);
 }
 
 void ofApp::keyPressed(int key)
 {
-  ofLogNotice() << "keyPressed(): " << key;
+  ofLogNotice() << "keyPressed(): " << ofToString(key);
   switch (key) {
     case 'c':
       capture();
@@ -51,7 +56,7 @@ void ofApp::keyPressed(int key)
 
 void ofApp::keyReleased(int key)
 {
-  ofLogNotice() << "keyReleased(): " << key;
+  ofLogNotice() << "keyReleased(): " << ofToString(key);
 }
 
 void ofApp::mouseMoved(int x, int y)
@@ -80,6 +85,9 @@ void ofApp::mouseExited(int x, int y)
 
 void ofApp::windowResized(int w, int h)
 {
+  ofLog(OF_LOG_NOTICE, "windowResized()");
+  gui->setWidth(ofGetWidth() - ofGetHeight());
+  windowRectangle.setSize(ofGetWidth(), ofGetHeight());
 }
 
 void ofApp::dragEvent(ofDragInfo dragInfo)
@@ -88,7 +96,7 @@ void ofApp::dragEvent(ofDragInfo dragInfo)
 
 void ofApp::gotMessage(ofMessage msg)
 {
-  ofLog() << msg;
+  ofLog() << msg.message;
 }
 
 void ofApp::exit()
@@ -113,3 +121,5 @@ void ofApp::capture()
     photo.startCapture();
   }
 }
+
+

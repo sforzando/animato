@@ -28,6 +28,10 @@ public:
   
   void capture();
   
+  ofRectangle windowRectangle;
+  ofRectangle gifRectangle;
+  ofRectangle previewRectangle;
+  ofRectangle photoRectangle;
   ofxDatGui * gui;
   ofxDatGuiButton *buttonCapture;
   
