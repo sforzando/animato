@@ -3,6 +3,7 @@
 #include "ofMain.h"
 #include "ofxDatGui.h"
 #include "ofxDatGuiCustomFontSize.h"
+#include "ofxPhoto.h"
 
 class ofApp : public ofBaseApp {
 public:
@@ -21,6 +22,18 @@ public:
   void windowResized(int w, int h);
   void dragEvent(ofDragInfo dragInfo);
   void gotMessage(ofMessage msg);
+  void exit();
+  
+  void onButtonCapture(ofxDatGuiButtonEvent e);
+  
+  void capture();
   
   ofxDatGui * gui;
+  ofxDatGuiButton *buttonCapture;
+  
+  ofFbo fbo;
+  
+  ofxPhoto photo;
+  unsigned char *pixelPicture;
+  ofImage imagePicture;
 };
