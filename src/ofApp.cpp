@@ -29,6 +29,7 @@ void ofApp::update()
     picturePixel = photo.capture();
     pictureImage.clear();
     pictureImage.setFromPixels(picturePixel, photo.getCaptureWidth(), photo.getCaptureHeight(), OF_IMAGE_COLOR, 0);
+    pictureImage.resize(photoRectangle.width, photoRectangle.height);
     ofLog(OF_LOG_NOTICE, "Photo loading finished.");
     isPhotoLoaded = true;
   } else { }
@@ -111,29 +112,31 @@ void ofApp::exit()
 ofVboMesh ofApp::getBackground()
 {
   if (!isBackgroundGenerated) {
-    backgroundMesh.addVertex(ofPoint(gifRectangle.width - photoRectangle.width, gifRectangle.height - photoRectangle.height, 0));
-    backgroundMesh.addColor(pictureImage.getColor(0, 0));
-
-    backgroundMesh.addVertex(ofPoint(gifRectangle.width - photoRectangle.width, gifRectangle.height, 0));
-    backgroundMesh.addColor(pictureImage.getColor(0, pictureImage.getHeight() - 1));
-    backgroundMesh.addVertex(ofPoint(0, gifRectangle.height, 0));
-    backgroundMesh.addColor(keyColor);
-
-    backgroundMesh.addVertex(ofPoint(0, gifRectangle.height, 0));
-    backgroundMesh.addColor(keyColor);
+    // origin: TOP-LEFT
     backgroundMesh.addVertex(ofPoint(0, 0, 0));
     backgroundMesh.addColor(keyColor);
 
-    backgroundMesh.addVertex(ofPoint(0, 0, 0));
-    backgroundMesh.addColor(keyColor);
-    backgroundMesh.addVertex(ofPoint(gifRectangle.getWidth(), 0, 0));
+
+    // BOTTOM-LEFT
+    backgroundMesh.addVertex(ofPoint(0, gifRectangle.height, 0));
     backgroundMesh.addColor(keyColor);
 
+    // PICTURE-LEFT
+    for (int y = 0; y < photoRectangle.height; y++) {
+      backgroundMesh.addVertex(ofPoint(gifRectangle.width - photoRectangle.width, gifRectangle.height - y, 0));
+      backgroundMesh.addColor(pictureImage.getColor(0, photoRectangle.height - y));
+    }
+
+    // PICTURE-TOP
+    for (int x = 0; x < photoRectangle.width; x++) {
+      backgroundMesh.addVertex(ofPoint(gifRectangle.width - photoRectangle.width + x, gifRectangle.height - photoRectangle.height, 0));
+      backgroundMesh.addColor(pictureImage.getColor(x, 0));
+    }
+
+    // TOP-RIGHT
     backgroundMesh.addVertex(ofPoint(gifRectangle.width, 0, 0));
     backgroundMesh.addColor(keyColor);
-    backgroundMesh.addVertex(ofPoint(gifRectangle.width, gifRectangle.height - photoRectangle.height, 0));
-    backgroundMesh.addColor(keyColor);
-    
+
     isBackgroundGenerated = true;
   }
 
@@ -149,7 +152,7 @@ void ofApp::onCaptureButton(ofxDatGuiButtonEvent e)
 void ofApp::capture()
 {
   ofLog(OF_LOG_NOTICE, "capture()");
-  isPhotoLoaded = false;
+  isPhotoLoaded         = false;
   isBackgroundGenerated = false;
   backgroundMesh.clear();
   photo.exit();
