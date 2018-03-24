@@ -108,7 +108,7 @@ void ofApp::exit()
   photo.exit();
 }
 
-ofMesh ofApp::getBackground()
+ofVboMesh ofApp::getBackground()
 {
   if (!isBackgroundGenerated) {
     backgroundMesh.addVertex(ofPoint(gifRectangle.width - photoRectangle.width, gifRectangle.height - photoRectangle.height, 0));
@@ -133,6 +133,8 @@ ofMesh ofApp::getBackground()
     backgroundMesh.addColor(keyColor);
     backgroundMesh.addVertex(ofPoint(gifRectangle.width, gifRectangle.height - photoRectangle.height, 0));
     backgroundMesh.addColor(keyColor);
+    
+    isBackgroundGenerated = true;
   }
 
   return backgroundMesh;
@@ -147,6 +149,7 @@ void ofApp::onCaptureButton(ofxDatGuiButtonEvent e)
 void ofApp::capture()
 {
   ofLog(OF_LOG_NOTICE, "capture()");
+  isPhotoLoaded = false;
   isBackgroundGenerated = false;
   backgroundMesh.clear();
   photo.exit();

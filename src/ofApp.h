@@ -24,7 +24,7 @@ public:
   void gotMessage(ofMessage msg);
   void exit();
 
-  ofMesh getBackground();
+  ofVboMesh getBackground();
   void onCaptureButton(ofxDatGuiButtonEvent e);
 
   void capture();
@@ -38,7 +38,7 @@ public:
   bool isBackgroundGenerated = false;
 
   ofColor keyColor = ofColor::fromHex(0xffd1cd);
-  ofMesh backgroundMesh;
+  ofVboMesh backgroundMesh;
 
   ofxDatGui * gui;
   ofxDatGuiButton *captureButton;
