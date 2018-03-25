@@ -24,9 +24,11 @@ public:
   void      gotMessage(ofMessage msg);
   void      exit();
 
-  ofVboMesh getBackground();
   void      onCaptureButton(ofxDatGuiButtonEvent e);
+  void      onLoadButton(ofxDatGuiButtonEvent e);
 
+  ofVboMesh getBackground();
+  void      loadPhoto();
   void      loadGara();
   void      loadHamon();
   void      capture();
@@ -46,6 +48,7 @@ public:
 
   ofxDatGui       *gui;
   ofxDatGuiButton *captureButton;
+  ofxDatGuiButton *loadButton;
 
   ofDirectory                garaUpperDirectory = ofDirectory(ofToDataPath("./materials/gara/upper"));
   ofDirectory                garaLowerDirectory = ofDirectory(ofToDataPath("./materials/gara/lower"));
@@ -64,9 +67,5 @@ public:
   unsigned char *picturePixel;
   ofImage        pictureImage;
 };
-
-
-
-
 
 

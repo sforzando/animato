@@ -12,8 +12,11 @@ void ofApp::setup()
   gui = new ofxDatGui(ofxDatGuiAnchor::TOP_RIGHT);
   gui->setTheme(new ofxDatGuiCustomFontSize);
   captureButton = gui->addButton("[C]apture");
-  captureButton->setLabelAlignment(ofxDatGuiAlignment::CENTER);
+  //  captureButton->setLabelAlignment(ofxDatGuiAlignment::CENTER);
   captureButton->onButtonEvent(this, &ofApp::onCaptureButton);
+  loadButton = gui->addButton("[L]oad");
+  //  loadButton->setLabelAlignment(ofxDatGuiAlignment::CENTER);
+  loadButton->onButtonEvent(this, &ofApp::onLoadButton);
   gui->addFRM();
 
   fbo.allocate(gifRectangle.width, gifRectangle.height, GL_RGBA32F_ARB);
@@ -68,6 +71,9 @@ void ofApp::keyPressed(int key)
   switch (key) {
     case 'c':
       capture();
+      break;
+    case 'l':
+      loadPhoto();
       break;
     default:
       break;
@@ -128,6 +134,8 @@ void ofApp::exit()
 ofVboMesh ofApp::getBackground()
 {
   if (!isBackgroundGenerated) {
+    backgroundMesh.clear();
+
     // origin: TOP-LEFT
     backgroundMesh.addVertex(ofPoint(0, 0, 0));
     backgroundMesh.addColor(keyColor);
@@ -138,9 +146,13 @@ ofVboMesh ofApp::getBackground()
     backgroundMesh.addColor(keyColor);
 
     // PICTURE-LEFT
-    for (int y = 0; y <= pictureRectangle.height; y++) {
+    for (int y = 0; y < pictureRectangle.height; y++) {
       backgroundMesh.addVertex(ofPoint(gifRectangle.width - pictureRectangle.width, gifRectangle.height - y, 0));
-      backgroundMesh.addColor(pictureImage.getColor(0, pictureRectangle.height - y));
+      backgroundMesh.addColor(pictureImage.getColor(0, (pictureRectangle.height - 1) - y));
+      if (y == 0) {
+        ofLog() << pictureImage.getColor(0, pictureRectangle.height - y);
+        ofLog() << pictureImage.getHeight();
+      }
     }
 
     // PICTURE-TOP
@@ -215,7 +227,6 @@ void ofApp::capture()
   ofLog(OF_LOG_NOTICE, "capture()");
   isPhotoLoaded         = false;
   isBackgroundGenerated = false;
-  backgroundMesh.clear();
   photo.exit();
   ofLog(OF_LOG_NOTICE, ofSystem("killall PTPCamera"));
   photo.init();
@@ -225,6 +236,24 @@ void ofApp::capture()
     ofLog(OF_LOG_WARNING, "Camera is busy.");
   } else {
     photo.startCapture();
+  }
+}
+
+void ofApp::onLoadButton(ofxDatGuiButtonEvent e)
+{
+  ofLog(OF_LOG_NOTICE, "onLoadButton()");
+  loadPhoto();
+}
+
+void ofApp::loadPhoto()
+{
+  ofLog(OF_LOG_NOTICE, "loadPhoto()");
+  ofFileDialogResult loadFileResult = ofSystemLoadDialog("");
+  if (loadFileResult.bSuccess) {
+    pictureImage = ofImage(loadFileResult.getPath());
+    pictureImage.resize(pictureRectangle.width, pictureRectangle.height);
+    isPhotoLoaded         = true;
+    isBackgroundGenerated = false;
   }
 }
 
