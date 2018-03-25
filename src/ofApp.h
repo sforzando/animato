@@ -27,6 +27,7 @@ public:
 
   void      onCaptureButton(ofxDatGuiButtonEvent e);
   void      onLoadButton(ofxDatGuiButtonEvent e);
+  void      onColorPicker(ofxDatGuiColorPickerEvent e);
 
   ofVboMesh getBackground();
   void      loadPhoto();
@@ -53,10 +54,11 @@ public:
   ofColor   keyColor = ofColor::fromHex(0xffd1cd);
   ofVboMesh backgroundMesh;
 
-  ofxDatGui          *gui;
-  ofxDatGuiButton    *captureButton;
-  ofxDatGuiButton    *loadButton;
-  ofxDatGuiTextInput *statusTextInput;
+  ofxDatGui            *gui;
+  ofxDatGuiButton      *captureButton;
+  ofxDatGuiButton      *loadButton;
+  ofxDatGuiColorPicker *colorPicker;
+  ofxDatGuiTextInput   *statusTextInput;
 
   ofDirectory                garaUpperDirectory = ofDirectory(ofToDataPath("./materials/gara/upper"));
   ofDirectory                garaLowerDirectory = ofDirectory(ofToDataPath("./materials/gara/lower"));
@@ -77,3 +79,5 @@ public:
   unsigned char *picturePixel;
   ofImage        pictureImage;
 };
+
+

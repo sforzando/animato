@@ -16,8 +16,11 @@ void ofApp::setup()
   captureButton->onButtonEvent(this, &ofApp::onCaptureButton);
   loadButton = gui->addButton("[L]oad");
   loadButton->onButtonEvent(this, &ofApp::onLoadButton);
-  statusTextInput = gui->addTextInput("Status");
+  colorPicker = gui->addColorPicker("Key Color");
+  colorPicker->setColor(keyColor);
+  colorPicker->onColorPickerEvent(this, &ofApp::onColorPicker);
   gui->addFRM();
+  statusTextInput = gui->addTextInput("Status");
 
   fbo.allocate(gifRectangle.width, gifRectangle.height, GL_RGBA32F_ARB);
   backgroundMesh.setMode(OF_PRIMITIVE_TRIANGLE_FAN);
@@ -266,6 +269,13 @@ void ofApp::loadPhoto()
     isPhotoLoaded         = true;
     isBackgroundGenerated = false;
   }
+}
+
+void ofApp::onColorPicker(ofxDatGuiColorPickerEvent e) {
+  ofLog(OF_LOG_NOTICE, "onColorPicker()");
+  keyColor = e.color;
+  isBackgroundGenerated = false;
+  setStatusMessage("The Key Color has been changed.");
 }
 
 void ofApp::setStatusMessage(string s, ofLogLevel level)
