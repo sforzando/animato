@@ -51,13 +51,11 @@ public:
   bool isGaraLoaded          = false;
   bool isHamonLoaded         = false;
 
-  ofColor   keyColor = ofColor::fromHex(0xffd1cd);
-  ofVboMesh backgroundMesh;
-
   ofxDatGui            *gui;
   ofxDatGuiButton      *captureButton;
   ofxDatGuiButton      *loadButton;
   ofxDatGuiColorPicker *colorPicker;
+  ofxDatGuiSlider      *previewFpsSlider;
   ofxDatGuiTextInput   *statusTextInput;
 
   ofDirectory                garaUpperDirectory = ofDirectory(ofToDataPath("./materials/gara/upper"));
@@ -73,11 +71,13 @@ public:
   int                        hamonNum;
   ofImage                    mojiImage = ofImage("./materials/moji.png");
 
-  ofFbo fbo;
-
+  int            previewFps = 6;
+  ofFbo          fbo;
   ofxPhoto       photo;
   unsigned char *picturePixel;
   ofImage        pictureImage;
+  ofColor        keyColor = ofColor::fromHex(0xffd1cd);
+  ofVboMesh      backgroundMesh;
 };
 
 

@@ -5,6 +5,7 @@ void ofApp::setup()
   ofLogToFile(ofGetTimestampString("%Y%m%d") + ".log", true);
   ofSetWindowTitle("");
   ofSetVerticalSync(true);
+  ofSetFrameRate(previewFps);
   windowRectangle.setSize(ofGetWidth(), ofGetHeight());
   gifRectangle.setSize(1080, 1080);
   previewRectangle.setSize(ofGetHeight(), ofGetHeight());
@@ -19,6 +20,11 @@ void ofApp::setup()
   colorPicker = gui->addColorPicker("Key Color");
   colorPicker->setColor(keyColor);
   colorPicker->onColorPickerEvent(this, &ofApp::onColorPicker);
+  previewFpsSlider = gui->addSlider("Preview FPS", 1.0, 60.0, previewFps);
+  previewFpsSlider->bind(previewFps);
+  previewFpsSlider->onSliderEvent([&](ofxDatGuiSliderEvent e) {
+    ofSetFrameRate(previewFps);
+  });
   gui->addFRM();
   statusTextInput = gui->addTextInput("Status");
 
@@ -271,9 +277,10 @@ void ofApp::loadPhoto()
   }
 }
 
-void ofApp::onColorPicker(ofxDatGuiColorPickerEvent e) {
+void ofApp::onColorPicker(ofxDatGuiColorPickerEvent e)
+{
   ofLog(OF_LOG_NOTICE, "onColorPicker()");
-  keyColor = e.color;
+  keyColor              = e.color;
   isBackgroundGenerated = false;
   setStatusMessage("The Key Color has been changed.");
 }
@@ -289,3 +296,5 @@ void ofApp::say(string s)
 {
   sysCommand.callCommand("say -v Alex " + s);
 }
+
+
