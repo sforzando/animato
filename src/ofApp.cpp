@@ -2,9 +2,8 @@
 
 void ofApp::setup()
 {
-  ofSetWindowTitle("animato");
+  ofSetWindowTitle("");
   ofSetVerticalSync(true);
-  ofEnableAlphaBlending();
   windowRectangle.setSize(ofGetWidth(), ofGetHeight());
   gifRectangle.setSize(1080, 1080);
   previewRectangle.setSize(ofGetHeight(), ofGetHeight());
@@ -20,6 +19,9 @@ void ofApp::setup()
   fbo.allocate(gifRectangle.width, gifRectangle.height, GL_RGBA32F_ARB);
   backgroundMesh.setMode(OF_PRIMITIVE_TRIANGLE_FAN);
 
+  loadGara();
+  loadHamon();
+
   photo.init();
 }
 
@@ -32,13 +34,25 @@ void ofApp::update()
     pictureImage.resize(pictureRectangle.width, pictureRectangle.height);
     ofLog(OF_LOG_NOTICE, "Photo loading finished.");
     isPhotoLoaded = true;
-  } else { }
+  }
+  fbo.begin();
+  ofDisableSmoothing();
+  ofEnableBlendMode(OF_BLENDMODE_ADD);
+  ofEnableAlphaBlending();
   if (isPhotoLoaded) {
-    fbo.begin();
     getBackground().drawFaces();
     pictureImage.draw(gifRectangle.width - pictureRectangle.width, gifRectangle.height - pictureRectangle.height, pictureRectangle.width, pictureRectangle.height);
-    fbo.end();
   }
+  if (isGaraLoaded) {
+    garaUpperVector[0][0].draw(0, 0);
+    garaLowerVector[0][0].draw(0, 0);
+  }
+  if (isHamonLoaded) {
+    hamonImages[ofGetFrameNum() % hamonNum].draw(0, 0);
+  }
+  ofDisableAlphaBlending();
+  ofEnableSmoothing();
+  fbo.end();
 }
 
 void ofApp::draw()
@@ -142,6 +156,51 @@ ofVboMesh ofApp::getBackground()
   }
 
   return backgroundMesh;
+}
+
+void ofApp::loadGara()
+{
+  ofLog(OF_LOG_NOTICE, "loadGara()");
+  garaUpperNum = garaUpperDirectory.listDir();
+  garaUpperVector.resize(garaUpperNum);
+  for (int i = 0; i < garaUpperNum; i++) {
+    ofDirectory      d       = ofDirectory(garaUpperDirectory.getPath(i));
+    int              garaNum = d.listDir();
+    vector <ofImage> v(garaNum);
+    for (int j = 0; j < garaNum; j++) {
+      string path = d.getPath(j);
+      ofLog() << "upper: " << path;
+      v[j] = ofImage(path);
+    }
+    garaUpperVector[i] = v;
+  }
+
+  garaLowerNum = garaLowerDirectory.listDir();
+  garaLowerVector.resize(garaLowerNum);
+  for (int i = 0; i < garaLowerNum; i++) {
+    ofDirectory      d       = ofDirectory(garaLowerDirectory.getPath(i));
+    int              garaNum = d.listDir();
+    vector <ofImage> v(garaNum);
+    for (int j = 0; j < garaNum; j++) {
+      string path = d.getPath(j);
+      ofLog() << "lower: " << path;
+      v[j] = ofImage(path);
+    }
+    garaLowerVector[i] = v;
+  }
+
+  isGaraLoaded = true;
+}
+
+void ofApp::loadHamon()
+{
+  ofLog(OF_LOG_NOTICE, "loadingHamon()");
+  hamonNum = hamonDirectory.listDir();
+  hamonImages.resize(hamonNum);
+  for (int i = 0; i < hamonNum; i++) {
+    hamonImages[i].load(hamonDirectory.getPath(i));
+  }
+  isHamonLoaded = true;
 }
 
 void ofApp::onCaptureButton(ofxDatGuiButtonEvent e)
