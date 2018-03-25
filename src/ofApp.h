@@ -27,6 +27,8 @@ public:
 
   void      onCaptureButton(ofxDatGuiButtonEvent e);
   void      onLoadButton(ofxDatGuiButtonEvent e);
+  void      onGaraUpperMatrix(ofxDatGuiMatrixEvent e);
+  void      onGaraLowerMatrix(ofxDatGuiMatrixEvent e);
   void      onColorPicker(ofxDatGuiColorPickerEvent e);
 
   ofVboMesh getBackground();
@@ -54,6 +56,8 @@ public:
   ofxDatGui            *gui;
   ofxDatGuiButton      *captureButton;
   ofxDatGuiButton      *loadButton;
+  ofxDatGuiMatrix      *garaUpperMatrix;
+  ofxDatGuiMatrix      *garaLowerMatrix;
   ofxDatGuiColorPicker *colorPicker;
   ofxDatGuiSlider      *previewFpsSlider;
   ofxDatGuiTextInput   *statusTextInput;
@@ -79,5 +83,3 @@ public:
   ofColor        keyColor = ofColor::fromHex(0xffd1cd);
   ofVboMesh      backgroundMesh;
 };
-
-

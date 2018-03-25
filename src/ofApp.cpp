@@ -11,13 +11,22 @@ void ofApp::setup()
   previewRectangle.setSize(ofGetHeight(), ofGetHeight());
   pictureRectangle.setSize(360, 360);
 
+  loadGara();
+  loadHamon();
+
   gui = new ofxDatGui(ofxDatGuiAnchor::TOP_RIGHT);
   gui->setTheme(new ofxDatGuiCustomFontSize);
   captureButton = gui->addButton("[C]apture");
   captureButton->onButtonEvent(this, &ofApp::onCaptureButton);
   loadButton = gui->addButton("[L]oad");
   loadButton->onButtonEvent(this, &ofApp::onLoadButton);
-  colorPicker = gui->addColorPicker("Key Color");
+  garaUpperMatrix = gui->addMatrix("Upper", garaUpperKinds);
+  garaUpperMatrix->setRadioMode(true);
+  garaUpperMatrix->onMatrixEvent(this, &ofApp::onGaraUpperMatrix);
+  garaLowerMatrix = gui->addMatrix("Lower", garaLowerKinds);
+  garaLowerMatrix->setRadioMode(true);
+  garaLowerMatrix->onMatrixEvent(this, &ofApp::onGaraLowerMatrix);
+  colorPicker     = gui->addColorPicker("Key Color");
   colorPicker->setColor(keyColor);
   colorPicker->onColorPickerEvent(this, &ofApp::onColorPicker);
   previewFpsSlider = gui->addSlider("Preview FPS", 1.0, 60.0, previewFps);
@@ -27,12 +36,10 @@ void ofApp::setup()
   });
   gui->addFRM();
   statusTextInput = gui->addTextInput("Status");
+  setStatusMessage("animato has been launched.");
 
   fbo.allocate(gifRectangle.width, gifRectangle.height, GL_RGBA32F_ARB);
   backgroundMesh.setMode(OF_PRIMITIVE_TRIANGLE_FAN);
-
-  loadGara();
-  loadHamon();
 
   photo.init();
 }
@@ -48,6 +55,7 @@ void ofApp::update()
     isPhotoLoaded = true;
   }
   fbo.begin();
+  ofClear(0);
   ofDisableSmoothing();
   ofEnableBlendMode(OF_BLENDMODE_ADD);
   ofEnableAlphaBlending();
@@ -58,8 +66,8 @@ void ofApp::update()
   if (isGaraLoaded) {
     int currentUpperFrame = ofGetFrameNum() % garaUpperVector[0].size();
     int currentLowerFrame = ofGetFrameNum() % garaLowerVector[0].size();
-    garaUpperVector[0][currentUpperFrame].draw(0, 0);
-    garaLowerVector[0][currentLowerFrame].draw(0, 0);
+    garaUpperVector[garaUpperCurrentKind][currentUpperFrame].draw(0, 0);
+    garaLowerVector[garaLowerCurrentKind][currentLowerFrame].draw(0, 0);
   }
   if (isHamonLoaded) {
     hamonImages[ofGetFrameNum() % hamonNum].draw(0, 0);
@@ -185,9 +193,9 @@ ofVboMesh ofApp::getBackground()
 void ofApp::loadGara()
 {
   ofLog(OF_LOG_NOTICE, "loadGara()");
-  int upperNum = garaUpperDirectory.listDir();
-  garaUpperVector.resize(upperNum);
-  for (int i = 0; i < upperNum; i++) {
+  garaUpperKinds = garaUpperDirectory.listDir();
+  garaUpperVector.resize(garaUpperKinds);
+  for (int i = 0; i < garaUpperKinds; i++) {
     ofDirectory      d       = ofDirectory(garaUpperDirectory.getPath(i));
     int              garaNum = d.listDir();
     vector <ofImage> v(garaNum);
@@ -199,9 +207,9 @@ void ofApp::loadGara()
     garaUpperVector[i] = v;
   }
 
-  int lowerNum = garaLowerDirectory.listDir();
-  garaLowerVector.resize(lowerNum);
-  for (int i = 0; i < lowerNum; i++) {
+  garaLowerKinds = garaLowerDirectory.listDir();
+  garaLowerVector.resize(garaLowerKinds);
+  for (int i = 0; i < garaLowerKinds; i++) {
     ofDirectory      d       = ofDirectory(garaLowerDirectory.getPath(i));
     int              garaNum = d.listDir();
     vector <ofImage> v(garaNum);
@@ -268,13 +276,21 @@ void ofApp::onLoadButton(ofxDatGuiButtonEvent e)
 void ofApp::loadPhoto()
 {
   ofLog(OF_LOG_NOTICE, "loadPhoto()");
-  ofFileDialogResult loadFileResult = ofSystemLoadDialog("");
+  ofFileDialogResult loadFileResult = ofSystemLoadDialog("Choose a photo");
   if (loadFileResult.bSuccess) {
     pictureImage = ofImage(loadFileResult.getPath());
     pictureImage.resize(pictureRectangle.width, pictureRectangle.height);
     isPhotoLoaded         = true;
     isBackgroundGenerated = false;
   }
+}
+
+void ofApp::onGaraUpperMatrix(ofxDatGuiMatrixEvent e) {
+  garaUpperCurrentKind = e.child;
+}
+
+void ofApp::onGaraLowerMatrix(ofxDatGuiMatrixEvent e) {
+  garaLowerCurrentKind = e.child;
 }
 
 void ofApp::onColorPicker(ofxDatGuiColorPickerEvent e)
@@ -288,7 +304,9 @@ void ofApp::onColorPicker(ofxDatGuiColorPickerEvent e)
 void ofApp::setStatusMessage(string s, ofLogLevel level)
 {
   ofLog(level, s);
-  statusTextInput->setText(s);
+  if (statusTextInput != nil) {
+    statusTextInput->setText(s);
+  }
   say(s);
 }
 
