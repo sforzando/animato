@@ -64,7 +64,7 @@
 					<key>defaultLocation</key>
 					<string>~/Downloads</string>
 					<key>granularity</key>
-					<integer>1</integer>
+					<integer>2</integer>
 					<key>multipleSelection</key>
 					<true/>
 					<key>promptMessage</key>
@@ -159,12 +159,10 @@
 						<string>3</string>
 					</dict>
 				</dict>
-				<key>conversionLabel</key>
-				<integer>0</integer>
 				<key>isViewVisible</key>
 				<true/>
 				<key>location</key>
-				<string>595.500000:210.000000</string>
+				<string>595.500000:158.000000</string>
 				<key>nibPath</key>
 				<string>/System/Library/Automator/Ask for Finder Items.action/Contents/Resources/Base.lproj/main.nib</string>
 			</dict>
@@ -261,12 +259,10 @@
 						<string>0</string>
 					</dict>
 				</dict>
-				<key>conversionLabel</key>
-				<integer>0</integer>
 				<key>isViewVisible</key>
 				<true/>
 				<key>location</key>
-				<string>595.500000:310.000000</string>
+				<string>595.500000:258.000000</string>
 				<key>nibPath</key>
 				<string>/System/Library/Automator/Get Folder Contents.action/Contents/Resources/Base.lproj/main.nib</string>
 			</dict>
@@ -383,12 +379,10 @@
 						<string>1</string>
 					</dict>
 				</dict>
-				<key>conversionLabel</key>
-				<integer>0</integer>
 				<key>isViewVisible</key>
 				<true/>
 				<key>location</key>
-				<string>595.500000:413.000000</string>
+				<string>595.500000:361.000000</string>
 				<key>nibPath</key>
 				<string>/System/Library/Automator/Copy Finder Items.action/Contents/Resources/Base.lproj/main.nib</string>
 			</dict>
@@ -520,12 +514,10 @@
 						<string>2</string>
 					</dict>
 				</dict>
-				<key>conversionLabel</key>
-				<integer>0</integer>
 				<key>isViewVisible</key>
 				<true/>
 				<key>location</key>
-				<string>595.500000:641.000000</string>
+				<string>595.500000:537.000000</string>
 				<key>nibPath</key>
 				<string>/System/Library/Automator/Pad Images.action/Contents/Resources/Base.lproj/main.nib</string>
 			</dict>
@@ -535,26 +527,26 @@
 	</array>
 	<key>connectors</key>
 	<dict>
-		<key>0DD2F168-3A04-4BE0-9D41-275F98477C4F</key>
+		<key>8C66DC18-66D8-4258-9349-57DB83A8EF2B</key>
 		<dict>
 			<key>from</key>
 			<string>2533B817-F234-4D57-B64D-87A29E49C750 - 2533B817-F234-4D57-B64D-87A29E49C750</string>
 			<key>to</key>
 			<string>2B58124D-D9B9-4505-820E-DB2DD3FBE121 - 2B58124D-D9B9-4505-820E-DB2DD3FBE121</string>
 		</dict>
-		<key>69FD5BC0-239D-429E-BD7A-D0C3B0DBFEB7</key>
-		<dict>
-			<key>from</key>
-			<string>28A25E0B-6E68-4E05-B248-F836DFC2D8C1 - 28A25E0B-6E68-4E05-B248-F836DFC2D8C1</string>
-			<key>to</key>
-			<string>2533B817-F234-4D57-B64D-87A29E49C750 - 2533B817-F234-4D57-B64D-87A29E49C750</string>
-		</dict>
-		<key>835E9F3C-66A1-4C99-A32A-9B55763DBE02</key>
+		<key>B403318C-EB27-43FD-B23C-769D3A9ECBE2</key>
 		<dict>
 			<key>from</key>
 			<string>2B58124D-D9B9-4505-820E-DB2DD3FBE121 - 2B58124D-D9B9-4505-820E-DB2DD3FBE121</string>
 			<key>to</key>
 			<string>1CC72DF3-2801-480F-ADEA-E9E7BCD7B202 - 1CC72DF3-2801-480F-ADEA-E9E7BCD7B202</string>
+		</dict>
+		<key>CDADCE0D-4853-4071-8EC7-F1674E49D50E</key>
+		<dict>
+			<key>from</key>
+			<string>28A25E0B-6E68-4E05-B248-F836DFC2D8C1 - 28A25E0B-6E68-4E05-B248-F836DFC2D8C1</string>
+			<key>to</key>
+			<string>2533B817-F234-4D57-B64D-87A29E49C750 - 2533B817-F234-4D57-B64D-87A29E49C750</string>
 		</dict>
 	</dict>
 	<key>workflowMetaData</key>

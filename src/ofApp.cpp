@@ -50,6 +50,7 @@ void ofApp::update()
   if (isHamonLoaded) {
     hamonImages[ofGetFrameNum() % hamonNum].draw(0, 0);
   }
+  mojiImage.draw(0, 0);
   ofDisableAlphaBlending();
   ofEnableSmoothing();
   fbo.end();
@@ -161,9 +162,9 @@ ofVboMesh ofApp::getBackground()
 void ofApp::loadGara()
 {
   ofLog(OF_LOG_NOTICE, "loadGara()");
-  garaUpperNum = garaUpperDirectory.listDir();
-  garaUpperVector.resize(garaUpperNum);
-  for (int i = 0; i < garaUpperNum; i++) {
+  int upperNum = garaUpperDirectory.listDir();
+  garaUpperVector.resize(upperNum);
+  for (int i = 0; i < upperNum; i++) {
     ofDirectory      d       = ofDirectory(garaUpperDirectory.getPath(i));
     int              garaNum = d.listDir();
     vector <ofImage> v(garaNum);
@@ -175,9 +176,9 @@ void ofApp::loadGara()
     garaUpperVector[i] = v;
   }
 
-  garaLowerNum = garaLowerDirectory.listDir();
-  garaLowerVector.resize(garaLowerNum);
-  for (int i = 0; i < garaLowerNum; i++) {
+  int lowerNum = garaLowerDirectory.listDir();
+  garaLowerVector.resize(lowerNum);
+  for (int i = 0; i < lowerNum; i++) {
     ofDirectory      d       = ofDirectory(garaLowerDirectory.getPath(i));
     int              garaNum = d.listDir();
     vector <ofImage> v(garaNum);

@@ -47,15 +47,16 @@ public:
   ofxDatGui       *gui;
   ofxDatGuiButton *captureButton;
 
-  ofDirectory                garaUpperDirectory = ofDirectory(ofToDataPath("./gara/upper"));
-  ofDirectory                garaLowerDirectory = ofDirectory(ofToDataPath("./gara/lower"));
+  ofDirectory                garaUpperDirectory = ofDirectory(ofToDataPath("./materials/gara/upper"));
+  ofDirectory                garaLowerDirectory = ofDirectory(ofToDataPath("./materials/gara/lower"));
   vector <vector <ofImage> > garaUpperVector;
   vector <vector <ofImage> > garaLowerVector;
   int                        garaUpperNum;
   int                        garaLowerNum;
-  ofDirectory                hamonDirectory = ofDirectory(ofToDataPath("./hamon"));
+  ofDirectory                hamonDirectory = ofDirectory(ofToDataPath("./materials/hamon"));
   vector <ofImage>           hamonImages;
   int                        hamonNum;
+  ofImage                    mojiImage = ofImage("./materials/moji.png");
 
   ofFbo fbo;
 
@@ -63,6 +64,7 @@ public:
   unsigned char *picturePixel;
   ofImage        pictureImage;
 };
+
 
 
 
