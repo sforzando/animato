@@ -17,18 +17,37 @@ void ofApp::setup()
   gui = new ofxDatGui(ofxDatGuiAnchor::TOP_RIGHT);
   gui->setTheme(new ofxDatGuiCustomFontSize);
   captureButton = gui->addButton("[C]apture");
-  captureButton->onButtonEvent(this, &ofApp::onCaptureButton);
+  captureButton->onButtonEvent([&](ofxDatGuiButtonEvent e) {
+    ofLog(OF_LOG_NOTICE, "onCaptureButton()");
+    capture();
+  });
   loadButton = gui->addButton("[L]oad");
-  loadButton->onButtonEvent(this, &ofApp::onLoadButton);
+  loadButton->onButtonEvent([&](ofxDatGuiButtonEvent e) {
+    ofLog(OF_LOG_NOTICE, "onLoadButton()");
+    loadPhoto();
+  });
   garaUpperMatrix = gui->addMatrix("Upper", garaUpperKinds);
   garaUpperMatrix->setRadioMode(true);
-  garaUpperMatrix->onMatrixEvent(this, &ofApp::onGaraUpperMatrix);
+  garaUpperMatrix->onMatrixEvent([&](ofxDatGuiMatrixEvent e) {
+    ofLog(OF_LOG_NOTICE, "onLoadButton()");
+    garaUpperCurrentKind = e.child;
+    ofApp::setStatusMessage("Upper Gara has been changed to " + ofToString(e.child));
+  });
   garaLowerMatrix = gui->addMatrix("Lower", garaLowerKinds);
   garaLowerMatrix->setRadioMode(true);
-  garaLowerMatrix->onMatrixEvent(this, &ofApp::onGaraLowerMatrix);
-  colorPicker     = gui->addColorPicker("Key Color");
+  garaLowerMatrix->onMatrixEvent([&](ofxDatGuiMatrixEvent e) {
+    ofLog(OF_LOG_NOTICE, "onLoadButton()");
+    garaUpperCurrentKind = e.child;
+    ofApp::setStatusMessage("Lower Gara has been changed to " + ofToString(e.child));
+  });
+  colorPicker = gui->addColorPicker("Key Color");
   colorPicker->setColor(keyColor);
-  colorPicker->onColorPickerEvent(this, &ofApp::onColorPicker);
+  colorPicker->onColorPickerEvent([&](ofxDatGuiColorPickerEvent e) {
+    ofLog(OF_LOG_NOTICE, "onColorPicker()");
+    keyColor              = e.color;
+    isBackgroundGenerated = false;
+    ofApp::setStatusMessage("The Key Color has been changed.");
+  });
   previewFpsSlider = gui->addSlider("Preview FPS", 1.0, 60.0, previewFps);
   previewFpsSlider->bind(previewFps);
   previewFpsSlider->onSliderEvent([&](ofxDatGuiSliderEvent e) {
@@ -237,12 +256,6 @@ void ofApp::loadHamon()
   setStatusMessage("Loading of moisture patterns has been completed.");
 }
 
-void ofApp::onCaptureButton(ofxDatGuiButtonEvent e)
-{
-  ofLog(OF_LOG_NOTICE, "onCaptureButton()");
-  capture();
-}
-
 void ofApp::capture()
 {
   ofLog(OF_LOG_NOTICE, "capture()");
@@ -267,12 +280,6 @@ bool ofApp::cameraCheck()
   return true;
 }
 
-void ofApp::onLoadButton(ofxDatGuiButtonEvent e)
-{
-  ofLog(OF_LOG_NOTICE, "onLoadButton()");
-  loadPhoto();
-}
-
 void ofApp::loadPhoto()
 {
   ofLog(OF_LOG_NOTICE, "loadPhoto()");
@@ -283,22 +290,6 @@ void ofApp::loadPhoto()
     isPhotoLoaded         = true;
     isBackgroundGenerated = false;
   }
-}
-
-void ofApp::onGaraUpperMatrix(ofxDatGuiMatrixEvent e) {
-  garaUpperCurrentKind = e.child;
-}
-
-void ofApp::onGaraLowerMatrix(ofxDatGuiMatrixEvent e) {
-  garaLowerCurrentKind = e.child;
-}
-
-void ofApp::onColorPicker(ofxDatGuiColorPickerEvent e)
-{
-  ofLog(OF_LOG_NOTICE, "onColorPicker()");
-  keyColor              = e.color;
-  isBackgroundGenerated = false;
-  setStatusMessage("The Key Color has been changed.");
 }
 
 void ofApp::setStatusMessage(string s, ofLogLevel level)
@@ -314,5 +305,3 @@ void ofApp::say(string s)
 {
   sysCommand.callCommand("say -v Alex " + s);
 }
-
-

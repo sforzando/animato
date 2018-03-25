@@ -25,12 +25,6 @@ public:
   void      gotMessage(ofMessage msg);
   void      exit();
 
-  void      onCaptureButton(ofxDatGuiButtonEvent e);
-  void      onLoadButton(ofxDatGuiButtonEvent e);
-  void      onGaraUpperMatrix(ofxDatGuiMatrixEvent e);
-  void      onGaraLowerMatrix(ofxDatGuiMatrixEvent e);
-  void      onColorPicker(ofxDatGuiColorPickerEvent e);
-
   ofVboMesh getBackground();
   void      loadPhoto();
   void      loadGara();
