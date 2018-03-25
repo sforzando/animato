@@ -5,25 +5,60 @@ void ofApp::setup()
   ofLogToFile(ofGetTimestampString("%Y%m%d") + ".log", true);
   ofSetWindowTitle("");
   ofSetVerticalSync(true);
+  ofSetFrameRate(previewFps);
   windowRectangle.setSize(ofGetWidth(), ofGetHeight());
   gifRectangle.setSize(1080, 1080);
   previewRectangle.setSize(ofGetHeight(), ofGetHeight());
   pictureRectangle.setSize(360, 360);
 
+  loadGara();
+  loadHamon();
+
   gui = new ofxDatGui(ofxDatGuiAnchor::TOP_RIGHT);
   gui->setTheme(new ofxDatGuiCustomFontSize);
   captureButton = gui->addButton("[C]apture");
-  captureButton->onButtonEvent(this, &ofApp::onCaptureButton);
+  captureButton->onButtonEvent([&](ofxDatGuiButtonEvent e) {
+    ofLog(OF_LOG_NOTICE, "onCaptureButton()");
+    capture();
+  });
   loadButton = gui->addButton("[L]oad");
-  loadButton->onButtonEvent(this, &ofApp::onLoadButton);
-  statusTextInput = gui->addTextInput("Status");
+  loadButton->onButtonEvent([&](ofxDatGuiButtonEvent e) {
+    ofLog(OF_LOG_NOTICE, "onLoadButton()");
+    loadPhoto();
+  });
+  garaUpperMatrix = gui->addMatrix("Upper", garaUpperKinds);
+  garaUpperMatrix->setRadioMode(true);
+  garaUpperMatrix->onMatrixEvent([&](ofxDatGuiMatrixEvent e) {
+    ofLog(OF_LOG_NOTICE, "onLoadButton()");
+    garaUpperCurrentKind = e.child;
+    ofApp::setStatusMessage("Upper Gara has been changed to " + ofToString(e.child));
+  });
+  garaLowerMatrix = gui->addMatrix("Lower", garaLowerKinds);
+  garaLowerMatrix->setRadioMode(true);
+  garaLowerMatrix->onMatrixEvent([&](ofxDatGuiMatrixEvent e) {
+    ofLog(OF_LOG_NOTICE, "onLoadButton()");
+    garaUpperCurrentKind = e.child;
+    ofApp::setStatusMessage("Lower Gara has been changed to " + ofToString(e.child));
+  });
+  colorPicker = gui->addColorPicker("Key Color");
+  colorPicker->setColor(keyColor);
+  colorPicker->onColorPickerEvent([&](ofxDatGuiColorPickerEvent e) {
+    ofLog(OF_LOG_NOTICE, "onColorPicker()");
+    keyColor              = e.color;
+    isBackgroundGenerated = false;
+    ofApp::setStatusMessage("The Key Color has been changed.");
+  });
+  previewFpsSlider = gui->addSlider("Preview FPS", 1.0, 60.0, previewFps);
+  previewFpsSlider->bind(previewFps);
+  previewFpsSlider->onSliderEvent([&](ofxDatGuiSliderEvent e) {
+    ofSetFrameRate(previewFps);
+  });
   gui->addFRM();
+  statusTextInput = gui->addTextInput("Status");
+  setStatusMessage("animato has been launched.");
 
   fbo.allocate(gifRectangle.width, gifRectangle.height, GL_RGBA32F_ARB);
   backgroundMesh.setMode(OF_PRIMITIVE_TRIANGLE_FAN);
-
-  loadGara();
-  loadHamon();
 
   photo.init();
 }
@@ -39,6 +74,7 @@ void ofApp::update()
     isPhotoLoaded = true;
   }
   fbo.begin();
+  ofClear(0);
   ofDisableSmoothing();
   ofEnableBlendMode(OF_BLENDMODE_ADD);
   ofEnableAlphaBlending();
@@ -49,8 +85,8 @@ void ofApp::update()
   if (isGaraLoaded) {
     int currentUpperFrame = ofGetFrameNum() % garaUpperVector[0].size();
     int currentLowerFrame = ofGetFrameNum() % garaLowerVector[0].size();
-    garaUpperVector[0][currentUpperFrame].draw(0, 0);
-    garaLowerVector[0][currentLowerFrame].draw(0, 0);
+    garaUpperVector[garaUpperCurrentKind][currentUpperFrame].draw(0, 0);
+    garaLowerVector[garaLowerCurrentKind][currentLowerFrame].draw(0, 0);
   }
   if (isHamonLoaded) {
     hamonImages[ofGetFrameNum() % hamonNum].draw(0, 0);
@@ -176,9 +212,9 @@ ofVboMesh ofApp::getBackground()
 void ofApp::loadGara()
 {
   ofLog(OF_LOG_NOTICE, "loadGara()");
-  int upperNum = garaUpperDirectory.listDir();
-  garaUpperVector.resize(upperNum);
-  for (int i = 0; i < upperNum; i++) {
+  garaUpperKinds = garaUpperDirectory.listDir();
+  garaUpperVector.resize(garaUpperKinds);
+  for (int i = 0; i < garaUpperKinds; i++) {
     ofDirectory      d       = ofDirectory(garaUpperDirectory.getPath(i));
     int              garaNum = d.listDir();
     vector <ofImage> v(garaNum);
@@ -190,9 +226,9 @@ void ofApp::loadGara()
     garaUpperVector[i] = v;
   }
 
-  int lowerNum = garaLowerDirectory.listDir();
-  garaLowerVector.resize(lowerNum);
-  for (int i = 0; i < lowerNum; i++) {
+  garaLowerKinds = garaLowerDirectory.listDir();
+  garaLowerVector.resize(garaLowerKinds);
+  for (int i = 0; i < garaLowerKinds; i++) {
     ofDirectory      d       = ofDirectory(garaLowerDirectory.getPath(i));
     int              garaNum = d.listDir();
     vector <ofImage> v(garaNum);
@@ -220,12 +256,6 @@ void ofApp::loadHamon()
   setStatusMessage("Loading of moisture patterns has been completed.");
 }
 
-void ofApp::onCaptureButton(ofxDatGuiButtonEvent e)
-{
-  ofLog(OF_LOG_NOTICE, "onCaptureButton()");
-  capture();
-}
-
 void ofApp::capture()
 {
   ofLog(OF_LOG_NOTICE, "capture()");
@@ -250,16 +280,10 @@ bool ofApp::cameraCheck()
   return true;
 }
 
-void ofApp::onLoadButton(ofxDatGuiButtonEvent e)
-{
-  ofLog(OF_LOG_NOTICE, "onLoadButton()");
-  loadPhoto();
-}
-
 void ofApp::loadPhoto()
 {
   ofLog(OF_LOG_NOTICE, "loadPhoto()");
-  ofFileDialogResult loadFileResult = ofSystemLoadDialog("");
+  ofFileDialogResult loadFileResult = ofSystemLoadDialog("Choose a photo");
   if (loadFileResult.bSuccess) {
     pictureImage = ofImage(loadFileResult.getPath());
     pictureImage.resize(pictureRectangle.width, pictureRectangle.height);
@@ -271,7 +295,9 @@ void ofApp::loadPhoto()
 void ofApp::setStatusMessage(string s, ofLogLevel level)
 {
   ofLog(level, s);
-  statusTextInput->setText(s);
+  if (statusTextInput != nil) {
+    statusTextInput->setText(s);
+  }
   say(s);
 }
 
