@@ -33,6 +33,7 @@ public:
   void      loadGara();
   void      loadHamon();
   void      capture();
+  bool      cameraCheck();
 
   void      setStatusMessage(string s, ofLogLevel level=OF_LOG_NOTICE);
   void      say(string s);

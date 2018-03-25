@@ -2,6 +2,7 @@
 
 void ofApp::setup()
 {
+  ofLogToFile(ofGetTimestampString("%Y%m%d") + ".log", true);
   ofSetWindowTitle("");
   ofSetVerticalSync(true);
   windowRectangle.setSize(ofGetWidth(), ofGetHeight());
@@ -68,7 +69,6 @@ void ofApp::draw()
 
 void ofApp::keyPressed(int key)
 {
-  say(ofToString(key));
   ofLogNotice() << "keyPressed(): " << ofToString(key);
   switch (key) {
     case 'c':
@@ -232,15 +232,22 @@ void ofApp::capture()
   isPhotoLoaded         = false;
   isBackgroundGenerated = false;
   photo.exit();
-  ofLog(OF_LOG_NOTICE, ofSystem("killall PTPCamera"));
+  cameraCheck();
   photo.init();
-  ofLog(OF_LOG_NOTICE, ofSystem("/usr/local/bin/gphoto2 --auto-detect"));
-  ofLog(OF_LOG_VERBOSE, ofSystem("/usr/local/bin/gphoto2 --debug --summary"));
   if (photo.isBusy()) {
     ofLog(OF_LOG_WARNING, "Camera is busy.");
   } else {
     photo.startCapture();
   }
+}
+
+bool ofApp::cameraCheck()
+{
+  ofSystem("killall PTPCamera");
+  ofSystem("/usr/local/bin/gphoto2 --auto-detect");
+  sysCommand.callCommand("/usr/local/bin/gphoto2 --debug --summary");
+
+  return true;
 }
 
 void ofApp::onLoadButton(ofxDatGuiButtonEvent e)
