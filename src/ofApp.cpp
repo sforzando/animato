@@ -16,30 +16,48 @@ void ofApp::setup()
 
   gui = new ofxDatGui(ofxDatGuiAnchor::TOP_RIGHT);
   gui->setTheme(new ofxDatGuiCustomFontSize);
-  captureButton = gui->addButton("[C]apture");
+  idFolder = gui->addFolder(": ID :");
+  prefixTextInput = idFolder->addTextInput(" - Prefix", "");
+  prefixTextInput->setInputType(ofxDatGuiInputType::ALPHA_NUMERIC);
+  idTextInput = idFolder->addTextInput(" - ID", "");
+  idTextInput->setInputType(ofxDatGuiInputType::NUMERIC);
+  idFolder->expand();
+  captureFolder = gui->addFolder(": Capture :");
+  captureButton = captureFolder->addButton(" - [C]apture");
   captureButton->onButtonEvent([&](ofxDatGuiButtonEvent e) {
     ofLog(OF_LOG_NOTICE, "onCaptureButton()");
     capture();
   });
-  loadButton = gui->addButton("[L]oad");
+  loadButton = captureFolder->addButton(" - [L]oad");
   loadButton->onButtonEvent([&](ofxDatGuiButtonEvent e) {
     ofLog(OF_LOG_NOTICE, "onLoadButton()");
     loadPhoto();
   });
-  garaUpperMatrix = gui->addMatrix("Upper", garaUpperKinds);
+  captureFolder->expand();
+  garaFolder = gui->addFolder(": Pattern :");
+  garaUpperMatrix = garaFolder->addMatrix(" - Upper", garaUpperKinds);
   garaUpperMatrix->setRadioMode(true);
   garaUpperMatrix->onMatrixEvent([&](ofxDatGuiMatrixEvent e) {
     ofLog(OF_LOG_NOTICE, "onLoadButton()");
     garaUpperCurrentKind = e.child;
     ofApp::setStatusMessage("Upper Gara has been changed to " + ofToString(e.child));
   });
-  garaLowerMatrix = gui->addMatrix("Lower", garaLowerKinds);
+  garaLowerMatrix = garaFolder->addMatrix(" - Lower", garaLowerKinds);
   garaLowerMatrix->setRadioMode(true);
   garaLowerMatrix->onMatrixEvent([&](ofxDatGuiMatrixEvent e) {
     ofLog(OF_LOG_NOTICE, "onLoadButton()");
     garaUpperCurrentKind = e.child;
     ofApp::setStatusMessage("Lower Gara has been changed to " + ofToString(e.child));
   });
+  garaFolder->expand();
+  exportFolder = gui->addFolder(": Export :");
+  exportButton = exportFolder->addButton(" - Export");
+  exportButton->onButtonEvent([&](ofxDatGuiButtonEvent e) {
+    ofLog(OF_LOG_NOTICE, "onExportBUtton()");
+  });
+  printToggle = exportFolder->addToggle("  - with QR");
+  printToggle->setChecked(true);
+  exportFolder->expand();
   colorPicker = gui->addColorPicker("Key Color");
   colorPicker->setColor(keyColor);
   colorPicker->onColorPickerEvent([&](ofxDatGuiColorPickerEvent e) {
@@ -305,3 +323,5 @@ void ofApp::say(string s)
 {
   sysCommand.callCommand("say -v Alex " + s);
 }
+
+

@@ -48,10 +48,18 @@ public:
   bool isHamonLoaded         = false;
 
   ofxDatGui            *gui;
+  ofxDatGuiFolder      *idFolder;
+  ofxDatGuiTextInput   *prefixTextInput;
+  ofxDatGuiTextInput   *idTextInput;
+  ofxDatGuiFolder      *captureFolder;
   ofxDatGuiButton      *captureButton;
   ofxDatGuiButton      *loadButton;
+  ofxDatGuiFolder      *garaFolder;
   ofxDatGuiMatrix      *garaUpperMatrix;
   ofxDatGuiMatrix      *garaLowerMatrix;
+  ofxDatGuiFolder      *exportFolder;
+  ofxDatGuiButton      *exportButton;
+  ofxDatGuiToggle      *printToggle;
   ofxDatGuiColorPicker *colorPicker;
   ofxDatGuiSlider      *previewFpsSlider;
   ofxDatGuiTextInput   *statusTextInput;
@@ -77,3 +85,6 @@ public:
   ofColor        keyColor = ofColor::fromHex(0xffd1cd);
   ofVboMesh      backgroundMesh;
 };
+
+
+
