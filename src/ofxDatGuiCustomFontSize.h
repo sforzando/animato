@@ -38,6 +38,7 @@ public:
     font.size              = 9;
     font.file              = "M+2VM+IPAG-circle.ttf";
     layout.upperCaseLabels = false;
+    layout.textInput.forceUpperCase = false;
 
     init();
   }

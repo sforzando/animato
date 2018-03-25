@@ -12,11 +12,10 @@ void ofApp::setup()
   gui = new ofxDatGui(ofxDatGuiAnchor::TOP_RIGHT);
   gui->setTheme(new ofxDatGuiCustomFontSize);
   captureButton = gui->addButton("[C]apture");
-  //  captureButton->setLabelAlignment(ofxDatGuiAlignment::CENTER);
   captureButton->onButtonEvent(this, &ofApp::onCaptureButton);
   loadButton = gui->addButton("[L]oad");
-  //  loadButton->setLabelAlignment(ofxDatGuiAlignment::CENTER);
   loadButton->onButtonEvent(this, &ofApp::onLoadButton);
+  statusTextInput = gui->addTextInput("Status");
   gui->addFRM();
 
   fbo.allocate(gifRectangle.width, gifRectangle.height, GL_RGBA32F_ARB);
@@ -35,7 +34,7 @@ void ofApp::update()
     pictureImage.clear();
     pictureImage.setFromPixels(picturePixel, photo.getCaptureWidth(), photo.getCaptureHeight(), OF_IMAGE_COLOR, 0);
     pictureImage.resize(pictureRectangle.width, pictureRectangle.height);
-    ofLog(OF_LOG_NOTICE, "Photo loading finished.");
+    setStatusMessage("Loading of the photo has been completed.");
     isPhotoLoaded = true;
   }
   fbo.begin();
@@ -47,8 +46,10 @@ void ofApp::update()
     pictureImage.draw(gifRectangle.width - pictureRectangle.width, gifRectangle.height - pictureRectangle.height, pictureRectangle.width, pictureRectangle.height);
   }
   if (isGaraLoaded) {
-    garaUpperVector[0][0].draw(0, 0);
-    garaLowerVector[0][0].draw(0, 0);
+    int currentUpperFrame = ofGetFrameNum() % garaUpperVector[0].size();
+    int currentLowerFrame = ofGetFrameNum() % garaLowerVector[0].size();
+    garaUpperVector[0][currentUpperFrame].draw(0, 0);
+    garaLowerVector[0][currentLowerFrame].draw(0, 0);
   }
   if (isHamonLoaded) {
     hamonImages[ofGetFrameNum() % hamonNum].draw(0, 0);
@@ -67,6 +68,7 @@ void ofApp::draw()
 
 void ofApp::keyPressed(int key)
 {
+  say(ofToString(key));
   ofLogNotice() << "keyPressed(): " << ofToString(key);
   switch (key) {
     case 'c':
@@ -203,6 +205,7 @@ void ofApp::loadGara()
   }
 
   isGaraLoaded = true;
+  setStatusMessage("Loading of Japanese patterns has been completed.");
 }
 
 void ofApp::loadHamon()
@@ -214,6 +217,7 @@ void ofApp::loadHamon()
     hamonImages[i].load(hamonDirectory.getPath(i));
   }
   isHamonLoaded = true;
+  setStatusMessage("Loading of moisture patterns has been completed.");
 }
 
 void ofApp::onCaptureButton(ofxDatGuiButtonEvent e)
@@ -257,4 +261,14 @@ void ofApp::loadPhoto()
   }
 }
 
+void ofApp::setStatusMessage(string s, ofLogLevel level)
+{
+  ofLog(level, s);
+  statusTextInput->setText(s);
+  say(s);
+}
 
+void ofApp::say(string s)
+{
+  sysCommand.callCommand("say -v Alex " + s);
+}

@@ -4,6 +4,7 @@
 #include "ofxDatGui.h"
 #include "ofxDatGuiCustomFontSize.h"
 #include "ofxPhoto.h"
+#include "SysCommand.h"
 
 class ofApp : public ofBaseApp {
 public:
@@ -33,6 +34,11 @@ public:
   void      loadHamon();
   void      capture();
 
+  void      setStatusMessage(string s, ofLogLevel level=OF_LOG_NOTICE);
+  void      say(string s);
+
+  SysCommand sysCommand;
+
   ofRectangle windowRectangle;
   ofRectangle gifRectangle;
   ofRectangle previewRectangle;
@@ -46,17 +52,20 @@ public:
   ofColor   keyColor = ofColor::fromHex(0xffd1cd);
   ofVboMesh backgroundMesh;
 
-  ofxDatGui       *gui;
-  ofxDatGuiButton *captureButton;
-  ofxDatGuiButton *loadButton;
+  ofxDatGui          *gui;
+  ofxDatGuiButton    *captureButton;
+  ofxDatGuiButton    *loadButton;
+  ofxDatGuiTextInput *statusTextInput;
 
   ofDirectory                garaUpperDirectory = ofDirectory(ofToDataPath("./materials/gara/upper"));
   ofDirectory                garaLowerDirectory = ofDirectory(ofToDataPath("./materials/gara/lower"));
   vector <vector <ofImage> > garaUpperVector;
   vector <vector <ofImage> > garaLowerVector;
-  int                        garaUpperNum;
-  int                        garaLowerNum;
-  ofDirectory                hamonDirectory = ofDirectory(ofToDataPath("./materials/hamon"));
+  int                        garaUpperKinds;
+  int                        garaLowerKinds;
+  int                        garaUpperCurrentKind = 0;
+  int                        garaLowerCurrentKind = 0;
+  ofDirectory                hamonDirectory       = ofDirectory(ofToDataPath("./materials/hamon"));
   vector <ofImage>           hamonImages;
   int                        hamonNum;
   ofImage                    mojiImage = ofImage("./materials/moji.png");
@@ -67,5 +76,3 @@ public:
   unsigned char *picturePixel;
   ofImage        pictureImage;
 };
-
-
