@@ -32,8 +32,11 @@ public:
   void      capture();
   bool      cameraCheck();
   void      generateGif();
-  void      printQr(string url);
-  void      uploadGif(string name);
+  void      printQr();
+  void      uploadGif();
+
+  void      selectGaraUpper(int kind);
+  void      selectGaraLower(int kind);
 
   void      setStatusMessage(string s, ofLogLevel level=OF_LOG_NOTICE);
   void      say(string s);
@@ -90,5 +93,6 @@ public:
   ofPixels       pixels;
   ofImage        generatingImage;
 };
+
 
 

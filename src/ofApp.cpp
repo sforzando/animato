@@ -36,18 +36,16 @@ void ofApp::setup()
   garaUpperMatrix = gui->addMatrix("Upper", garaUpperKinds);
   garaUpperMatrix->setRadioMode(true);
   garaUpperMatrix->onMatrixEvent([&](ofxDatGuiMatrixEvent e) {
-    ofLog(OF_LOG_NOTICE, "onLoadButton()");
-    garaUpperCurrentKind = e.child;
-    ofApp::setStatusMessage("Upper Gara has been changed to " + ofToString(e.child));
+    ofLog(OF_LOG_NOTICE, "onGaraUpperMatrix()");
+    ofApp::selectGaraUpper(e.child);
   });
   garaLowerMatrix = gui->addMatrix("Lower", garaLowerKinds);
   garaLowerMatrix->setRadioMode(true);
   garaLowerMatrix->onMatrixEvent([&](ofxDatGuiMatrixEvent e) {
-    ofLog(OF_LOG_NOTICE, "onLoadButton()");
-    garaLowerCurrentKind = e.child;
-    ofApp::setStatusMessage("Lower Gara has been changed to " + ofToString(e.child));
+    ofLog(OF_LOG_NOTICE, "onGaraLowerMatrix()");
+    ofApp::selectGaraLower(e.child);
   });
-  generateButtonofcolor = gui->addButton("Generate");
+  generateButton = gui->addButton("Generate");
   generateButton->onButtonEvent([&](ofxDatGuiButtonEvent e) {
     ofLog(OF_LOG_NOTICE, "onGenerateBUtton()");
     ofApp::generateGif();
@@ -129,6 +127,72 @@ void ofApp::keyPressed(int key)
       break;
     case 'l':
       loadPhoto();
+      break;
+    case 'g':
+      generateGif();
+      break;
+    case OF_KEY_RETURN:
+      generateGif();
+      break;
+    case '/':
+      printQr();
+      break;
+    case '1':
+      selectGaraUpper(0);
+      break;
+    case '2':
+      selectGaraUpper(1);
+      break;
+    case '3':
+      selectGaraUpper(2);
+      break;
+    case '4':
+      selectGaraUpper(3);
+      break;
+    case '5':
+      selectGaraUpper(4);
+      break;
+    case '6':
+      selectGaraUpper(5);
+      break;
+    case '7':
+      selectGaraUpper(6);
+      break;
+    case '8':
+      selectGaraUpper(7);
+      break;
+    case '9':
+      selectGaraUpper(8);
+      break;
+    case 'q':
+      selectGaraLower(0);
+      break;
+    case 'w':
+      selectGaraLower(1);
+      break;
+    case 'e':
+      selectGaraLower(2);
+      break;
+    case 'r':
+      selectGaraLower(3);
+      break;
+    case 't':
+      selectGaraLower(4);
+      break;
+    case 'y':
+      selectGaraLower(5);
+      break;
+    case 'u':
+      selectGaraLower(6);
+      break;
+    case 'i':
+      selectGaraLower(7);
+      break;
+    case 'o':
+      selectGaraLower(8);
+      break;
+    case 'p':
+      selectGaraLower(9);
       break;
     default:
       break;
@@ -229,8 +293,10 @@ ofVboMesh ofApp::getBackground()
 void ofApp::loadGara()
 {
   ofLog(OF_LOG_NOTICE, "loadGara()");
+
   garaUpperKinds = garaUpperDirectory.listDir();
   garaUpperVector.resize(garaUpperKinds);
+  garaUpperDirectory.sort();
   for (int i = 0; i < garaUpperKinds; i++) {
     ofDirectory      d       = ofDirectory(garaUpperDirectory.getPath(i));
     int              garaNum = d.listDir();
@@ -245,6 +311,7 @@ void ofApp::loadGara()
 
   garaLowerKinds = garaLowerDirectory.listDir();
   garaLowerVector.resize(garaLowerKinds);
+  garaLowerDirectory.sort();
   for (int i = 0; i < garaLowerKinds; i++) {
     ofDirectory      d       = ofDirectory(garaLowerDirectory.getPath(i));
     int              garaNum = d.listDir();
@@ -314,7 +381,7 @@ void ofApp::generateGif()
   generateButton->setBackgroundColor(ofColor::fromHex(0xffd1cd));
   ofApp::setStatusMessage("Generate process has been started.");
 
-  isGenerating = true;
+  isGenerating      = true;
   generateTimestamp = ofGetTimestampString("%d%H%M%s");
   fbo.readToPixels(pixels);
   generatingImage.setFromPixels(pixels);
@@ -329,12 +396,40 @@ void ofApp::generateGif()
   }
 }
 
-void ofApp::printQr(string url)
+void ofApp::printQr()
 {
+  ofApp::setStatusMessage("Print process has been started.");
 }
 
-void ofApp::uploadGif(string name)
+void ofApp::uploadGif()
 {
+  ofApp::setStatusMessage("Upload process has been started.");
+}
+
+void ofApp::selectGaraUpper(int kind)
+{
+  for (int i = 0; i < garaUpperKinds; i++) {
+    if (i == kind) {
+      garaUpperMatrix->getChildAt(i)->setSelected(true);
+    } else {
+      garaUpperMatrix->getChildAt(i)->setSelected(false);
+    }
+  }
+  garaUpperCurrentKind = kind;
+  setStatusMessage("Upper Gara has been changed to " + ofToString(kind));
+}
+
+void ofApp::selectGaraLower(int kind)
+{
+  for (int i = 0; i < garaLowerKinds; i++) {
+    if (i == kind) {
+      garaLowerMatrix->getChildAt(i)->setSelected(true);
+    } else {
+      garaLowerMatrix->getChildAt(i)->setSelected(false);
+    }
+  }
+  garaLowerCurrentKind = kind;
+  setStatusMessage("Lower Gara has been changed to " + ofToString(kind));
 }
 
 void ofApp::setStatusMessage(string s, ofLogLevel level)
@@ -350,3 +445,5 @@ void ofApp::say(string s)
 {
   sysCommand.callCommand("say -v Alex " + s);
 }
+
+
