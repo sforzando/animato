@@ -49,9 +49,9 @@ public:
   bool   isBackgroundGenerated = false;
   bool   isGaraLoaded          = false;
   bool   isHamonLoaded         = false;
-  bool   isGenerating           = false;
-  int    generatingCount        = 0;
-  string generateTimestamp       = "";
+  bool   isGenerating          = false;
+  int    generatingCount       = 0;
+  string generateTimestamp     = "";
 
   ofxDatGui            *gui;
   ofxDatGuiButton      *captureButton;

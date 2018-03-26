@@ -347,5 +347,3 @@ void ofApp::say(string s)
 {
   sysCommand.callCommand("say -v Alex " + s);
 }
-
-
