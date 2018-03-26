@@ -2,7 +2,7 @@
 
 void ofApp::setup()
 {
-  if(!outputDirectory.exists()) {
+  if (!outputDirectory.exists()) {
     outputDirectory.create();
   }
   if (!logDirectory.exists()) {
@@ -23,46 +23,40 @@ void ofApp::setup()
 
   gui = new ofxDatGui(ofxDatGuiAnchor::TOP_RIGHT);
   gui->setTheme(new ofxDatGuiCustomFontSize);
-  captureFolder = gui->addFolder(": Capture :");
-  captureButton = captureFolder->addButton(" - [C]apture");
+  captureButton = gui->addButton(" - [C]apture");
   captureButton->onButtonEvent([&](ofxDatGuiButtonEvent e) {
     ofLog(OF_LOG_NOTICE, "onCaptureButton()");
     capture();
   });
-  loadButton = captureFolder->addButton(" - [L]oad");
+  loadButton = gui->addButton(" - [L]oad");
   loadButton->onButtonEvent([&](ofxDatGuiButtonEvent e) {
     ofLog(OF_LOG_NOTICE, "onLoadButton()");
     loadPhoto();
   });
-  captureFolder->expand();
-  garaFolder      = gui->addFolder(": Pattern :");
-  garaUpperMatrix = garaFolder->addMatrix(" - Upper", garaUpperKinds);
+  garaUpperMatrix = gui->addMatrix(" - Upper", garaUpperKinds);
   garaUpperMatrix->setRadioMode(true);
   garaUpperMatrix->onMatrixEvent([&](ofxDatGuiMatrixEvent e) {
     ofLog(OF_LOG_NOTICE, "onLoadButton()");
     garaUpperCurrentKind = e.child;
     ofApp::setStatusMessage("Upper Gara has been changed to " + ofToString(e.child));
   });
-  garaLowerMatrix = garaFolder->addMatrix(" - Lower", garaLowerKinds);
+  garaLowerMatrix = gui->addMatrix(" - Lower", garaLowerKinds);
   garaLowerMatrix->setRadioMode(true);
   garaLowerMatrix->onMatrixEvent([&](ofxDatGuiMatrixEvent e) {
     ofLog(OF_LOG_NOTICE, "onLoadButton()");
     garaUpperCurrentKind = e.child;
     ofApp::setStatusMessage("Lower Gara has been changed to " + ofToString(e.child));
   });
-  garaFolder->expand();
-  exportFolder = gui->addFolder(": Export :");
-  exportButton = exportFolder->addButton(" - Export");
+  exportButton = gui->addButton(" - Export");
   exportButton->onButtonEvent([&](ofxDatGuiButtonEvent e) {
     ofLog(OF_LOG_NOTICE, "onExportBUtton()");
-    isExporting = true;
-    exportTimestamp = ofGetTimestampString("%d%H%M%s");
+    isGenerating = true;
+    generateTimestamp = ofGetTimestampString("%d%H%M%s");
     exportButton->setBackgroundColor(ofColor(255, 0, 0));
     ofApp::setStatusMessage("Export process has been started.");
   });
-  printToggle = exportFolder->addToggle("  - with QR");
+  printToggle = gui->addToggle("  - with QR");
   printToggle->setChecked(true);
-  exportFolder->expand();
   colorPicker = gui->addColorPicker("Key Color");
   colorPicker->setColor(keyColor);
   colorPicker->onColorPickerEvent([&](ofxDatGuiColorPickerEvent e) {
@@ -124,17 +118,8 @@ void ofApp::draw()
 {
   ofBackgroundHex(0x000000);
   fbo.draw(0, 0, previewRectangle.width, previewRectangle.height);
-  if (isExporting) {
-    fbo.readToPixels(pixels);
-    exportImage.setFromPixels(pixels);
-    exportImage.save("output/" + exportTimestamp + "_" + ofToString(exportingCount, 2, '0') + ".png");
-    if (exportingCount < previewFps) {
-      exportingCount++;
-    } else {
-      isExporting    = false;
-      exportingCount = 0;
-      setStatusMessage("Export completed.");
-    }
+  if (isGenerating) {
+    generateGif();
   }
 }
 
@@ -325,6 +310,28 @@ void ofApp::loadPhoto()
     isPhotoLoaded         = true;
     isBackgroundGenerated = false;
   }
+}
+
+void ofApp::generateGif()
+{
+  fbo.readToPixels(pixels);
+  generatingImage.setFromPixels(pixels);
+  generatingImage.save("output/" + generateTimestamp + "_" + ofToString(generatingCount, 2, '0') + ".png");
+  if (generatingCount < previewFps) {
+    generatingCount++;
+  } else {
+    isGenerating    = false;
+    generatingCount = 0;
+    setStatusMessage("Export completed.");
+  }
+}
+
+void ofApp::printQr(string url)
+{
+}
+
+void ofApp::uploadGif(string name)
+{
 }
 
 void ofApp::setStatusMessage(string s, ofLogLevel level)

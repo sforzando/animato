@@ -31,6 +31,9 @@ public:
   void      loadHamon();
   void      capture();
   bool      cameraCheck();
+  void      generateGif();
+  void      printQr(string url);
+  void      uploadGif(string name);
 
   void      setStatusMessage(string s, ofLogLevel level=OF_LOG_NOTICE);
   void      say(string s);
@@ -46,18 +49,15 @@ public:
   bool   isBackgroundGenerated = false;
   bool   isGaraLoaded          = false;
   bool   isHamonLoaded         = false;
-  bool   isExporting           = false;
-  int    exportingCount        = 0;
-  string exportTimestamp       = "";
+  bool   isGenerating           = false;
+  int    generatingCount        = 0;
+  string generateTimestamp       = "";
 
   ofxDatGui            *gui;
-  ofxDatGuiFolder      *captureFolder;
   ofxDatGuiButton      *captureButton;
   ofxDatGuiButton      *loadButton;
-  ofxDatGuiFolder      *garaFolder;
   ofxDatGuiMatrix      *garaUpperMatrix;
   ofxDatGuiMatrix      *garaLowerMatrix;
-  ofxDatGuiFolder      *exportFolder;
   ofxDatGuiButton      *exportButton;
   ofxDatGuiToggle      *printToggle;
   ofxDatGuiColorPicker *colorPicker;
@@ -87,5 +87,5 @@ public:
   ofColor        keyColor = ofColor::fromHex(0xffd1cd);
   ofVboMesh      backgroundMesh;
   ofPixels       pixels;
-  ofImage        exportImage;
+  ofImage        generatingImage;
 };
