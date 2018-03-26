@@ -2,7 +2,13 @@
 
 void ofApp::setup()
 {
-  ofLogToFile(ofGetTimestampString("%Y%m%d") + ".log", true);
+  if(!outputDirectory.exists()) {
+    outputDirectory.create();
+  }
+  if (!logDirectory.exists()) {
+    logDirectory.create();
+  }
+  ofLogToFile("log/" + ofGetTimestampString("%Y%m%d") + ".log", true);
   ofSetWindowTitle("");
   ofSetVerticalSync(true);
   ofSetFrameRate(previewFps);
@@ -10,18 +16,13 @@ void ofApp::setup()
   gifRectangle.setSize(1080, 1080);
   previewRectangle.setSize(ofGetHeight(), ofGetHeight());
   pictureRectangle.setSize(360, 360);
+  ofLog() << "pwd: " << ofSystem("pwd");
 
   loadGara();
   loadHamon();
 
   gui = new ofxDatGui(ofxDatGuiAnchor::TOP_RIGHT);
   gui->setTheme(new ofxDatGuiCustomFontSize);
-  idFolder = gui->addFolder(": ID :");
-  prefixTextInput = idFolder->addTextInput(" - Prefix", "");
-  prefixTextInput->setInputType(ofxDatGuiInputType::ALPHA_NUMERIC);
-  idTextInput = idFolder->addTextInput(" - ID", "");
-  idTextInput->setInputType(ofxDatGuiInputType::NUMERIC);
-  idFolder->expand();
   captureFolder = gui->addFolder(": Capture :");
   captureButton = captureFolder->addButton(" - [C]apture");
   captureButton->onButtonEvent([&](ofxDatGuiButtonEvent e) {
@@ -34,7 +35,7 @@ void ofApp::setup()
     loadPhoto();
   });
   captureFolder->expand();
-  garaFolder = gui->addFolder(": Pattern :");
+  garaFolder      = gui->addFolder(": Pattern :");
   garaUpperMatrix = garaFolder->addMatrix(" - Upper", garaUpperKinds);
   garaUpperMatrix->setRadioMode(true);
   garaUpperMatrix->onMatrixEvent([&](ofxDatGuiMatrixEvent e) {
@@ -54,6 +55,10 @@ void ofApp::setup()
   exportButton = exportFolder->addButton(" - Export");
   exportButton->onButtonEvent([&](ofxDatGuiButtonEvent e) {
     ofLog(OF_LOG_NOTICE, "onExportBUtton()");
+    isExporting = true;
+    exportTimestamp = ofGetTimestampString("%d%H%M%s");
+    exportButton->setBackgroundColor(ofColor(255, 0, 0));
+    ofApp::setStatusMessage("Export process has been started.");
   });
   printToggle = exportFolder->addToggle("  - with QR");
   printToggle->setChecked(true);
@@ -88,7 +93,7 @@ void ofApp::update()
     pictureImage.clear();
     pictureImage.setFromPixels(picturePixel, photo.getCaptureWidth(), photo.getCaptureHeight(), OF_IMAGE_COLOR, 0);
     pictureImage.resize(pictureRectangle.width, pictureRectangle.height);
-    setStatusMessage("Loading of the photo has been completed.");
+    setStatusMessage("Loading of the photo completed.");
     isPhotoLoaded = true;
   }
   fbo.begin();
@@ -119,6 +124,18 @@ void ofApp::draw()
 {
   ofBackgroundHex(0x000000);
   fbo.draw(0, 0, previewRectangle.width, previewRectangle.height);
+  if (isExporting) {
+    fbo.readToPixels(pixels);
+    exportImage.setFromPixels(pixels);
+    exportImage.save("output/" + exportTimestamp + "_" + ofToString(exportingCount, 2, '0') + ".png");
+    if (exportingCount < previewFps) {
+      exportingCount++;
+    } else {
+      isExporting    = false;
+      exportingCount = 0;
+      setStatusMessage("Export completed.");
+    }
+  }
 }
 
 void ofApp::keyPressed(int key)
@@ -238,7 +255,7 @@ void ofApp::loadGara()
     vector <ofImage> v(garaNum);
     for (int j = 0; j < garaNum; j++) {
       string path = d.getPath(j);
-      ofLog() << "upper: " << path;
+      ofLog() << "Upper Gara: " << path;
       v[j] = ofImage(path);
     }
     garaUpperVector[i] = v;
@@ -252,14 +269,14 @@ void ofApp::loadGara()
     vector <ofImage> v(garaNum);
     for (int j = 0; j < garaNum; j++) {
       string path = d.getPath(j);
-      ofLog() << "lower: " << path;
+      ofLog() << "Lower Gara: " << path;
       v[j] = ofImage(path);
     }
     garaLowerVector[i] = v;
   }
 
   isGaraLoaded = true;
-  setStatusMessage("Loading of Japanese patterns has been completed.");
+  setStatusMessage("Loading of Japanese patterns completed.");
 }
 
 void ofApp::loadHamon()
@@ -271,7 +288,7 @@ void ofApp::loadHamon()
     hamonImages[i].load(hamonDirectory.getPath(i));
   }
   isHamonLoaded = true;
-  setStatusMessage("Loading of moisture patterns has been completed.");
+  setStatusMessage("Loading of moisture patterns completed.");
 }
 
 void ofApp::capture()

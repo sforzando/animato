@@ -42,15 +42,15 @@ public:
   ofRectangle previewRectangle;
   ofRectangle pictureRectangle;
 
-  bool isPhotoLoaded         = false;
-  bool isBackgroundGenerated = false;
-  bool isGaraLoaded          = false;
-  bool isHamonLoaded         = false;
+  bool   isPhotoLoaded         = false;
+  bool   isBackgroundGenerated = false;
+  bool   isGaraLoaded          = false;
+  bool   isHamonLoaded         = false;
+  bool   isExporting           = false;
+  int    exportingCount        = 0;
+  string exportTimestamp       = "";
 
   ofxDatGui            *gui;
-  ofxDatGuiFolder      *idFolder;
-  ofxDatGuiTextInput   *prefixTextInput;
-  ofxDatGuiTextInput   *idTextInput;
   ofxDatGuiFolder      *captureFolder;
   ofxDatGuiButton      *captureButton;
   ofxDatGuiButton      *loadButton;
@@ -75,7 +75,9 @@ public:
   ofDirectory                hamonDirectory       = ofDirectory(ofToDataPath("./materials/hamon"));
   vector <ofImage>           hamonImages;
   int                        hamonNum;
-  ofImage                    mojiImage = ofImage("./materials/moji.png");
+  ofImage                    mojiImage       = ofImage("./materials/moji.png");
+  ofDirectory                logDirectory    = ofDirectory("./log");
+  ofDirectory                outputDirectory = ofDirectory("./output");
 
   int            previewFps = 6;
   ofFbo          fbo;
@@ -84,7 +86,6 @@ public:
   ofImage        pictureImage;
   ofColor        keyColor = ofColor::fromHex(0xffd1cd);
   ofVboMesh      backgroundMesh;
+  ofPixels       pixels;
+  ofImage        exportImage;
 };
-
-
-
