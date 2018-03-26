@@ -82,8 +82,11 @@ public:
   ofImage                    mojiImage       = ofImage("./materials/moji.png");
   ofDirectory                logDirectory    = ofDirectory("./log");
   ofDirectory                outputDirectory = ofDirectory("./output");
+  string                     outputPath;
+  ofDirectory                archiveDirectory = ofDirectory("./archive");
+  string                     archivePath;
 
-  int            previewFps = 6;
+  int            previewFps = 4;
   ofFbo          fbo;
   ofxPhoto       photo;
   unsigned char *picturePixel;
@@ -93,6 +96,4 @@ public:
   ofPixels       pixels;
   ofImage        generatingImage;
 };
-
-
 

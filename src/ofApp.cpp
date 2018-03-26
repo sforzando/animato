@@ -2,9 +2,14 @@
 
 void ofApp::setup()
 {
+  if (!archiveDirectory.exists()) {
+    archiveDirectory.create();
+  }
+  archivePath = archiveDirectory.getAbsolutePath();
   if (!outputDirectory.exists()) {
     outputDirectory.create();
   }
+  outputPath = outputDirectory.getAbsolutePath();
   if (!logDirectory.exists()) {
     logDirectory.create();
   }
@@ -45,7 +50,7 @@ void ofApp::setup()
     ofLog(OF_LOG_NOTICE, "onGaraLowerMatrix()");
     ofApp::selectGaraLower(e.child);
   });
-  generateButton = gui->addButton("Generate");
+  generateButton = gui->addButton("[G]enerate");
   generateButton->onButtonEvent([&](ofxDatGuiButtonEvent e) {
     ofLog(OF_LOG_NOTICE, "onGenerateBUtton()");
     ofApp::generateGif();
@@ -231,7 +236,7 @@ void ofApp::mouseExited(int x, int y)
 void ofApp::windowResized(int w, int h)
 {
   ofLog(OF_LOG_NOTICE, "windowResized()");
-  gui->setWidth(ofGetWidth() - ofGetHeight());
+  if ((360 < ofGetWidth() - ofGetHeight())) {  gui->setWidth(ofGetWidth() - ofGetHeight()); } else {  gui->setWidth(360); }
   windowRectangle.setSize(ofGetWidth(), ofGetHeight());
   previewRectangle.setSize(windowRectangle.height, windowRectangle.height);
 }
@@ -381,17 +386,24 @@ void ofApp::generateGif()
   generateButton->setBackgroundColor(ofColor::fromHex(0xffd1cd));
   ofApp::setStatusMessage("Generate process has been started.");
 
-  isGenerating      = true;
-  generateTimestamp = ofGetTimestampString("%d%H%M%s");
+  ofSystem("cp -f " + outputPath + "/* " + archivePath + "/");  // Archive
+
+  isGenerating        = true;
+  generateTimestamp   = ofGetTimestampString("%d%H%M%s");
+  generateGifFileName = generateTimestamp + ".gif";
   fbo.readToPixels(pixels);
   generatingImage.setFromPixels(pixels);
-  generatingImage.save("output/" + generateTimestamp + "_" + ofToString(generatingCount, 2, '0') + ".png");
+  generatingImage.save(outputPath + "/" + ofToString(generatingCount, 2, '0') + ".png");
   if (generatingCount < previewFps) {
     generatingCount++;
   } else {
+    ofSystem("/usr/local/bin/ffmpeg -i " + outputPath + "/00.png -vf palettegen " + outputPath + "/palette.png");  // Make Palette
+    ofSystem("/usr/local/bin/ffmpeg -f image2 -r " + ofToString(previewFps) + " -i " + outputPath + "/%02d.png -i " + outputPath + "/palette.png -filter_complex paletteuse " + outputPath + "/" + generateGifFileName);
+    
     isGenerating    = false;
     generatingCount = 0;
     generateButton->setBackgroundColor(ofColor::fromHex(0xd8d8d8));
+    
     setStatusMessage("Generate completed.");
   }
 }
