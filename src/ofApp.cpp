@@ -397,25 +397,28 @@ void ofApp::generateGif()
   if (generatingCount < previewFps) {
     generatingCount++;
   } else {
-    ofSystem("/usr/local/bin/ffmpeg -i " + outputPath + "/00.png -vf palettegen " + outputPath + "/palette.png");  // Make Palette
+    ofSystem("/usr/local/bin/ffmpeg -i " + outputPath + "/00.png -vf palettegen -y " + outputPath + "/palette.png");  // Make Palette
     ofSystem("/usr/local/bin/ffmpeg -f image2 -r " + ofToString(previewFps) + " -i " + outputPath + "/%02d.png -i " + outputPath + "/palette.png -filter_complex paletteuse " + outputPath + "/" + generateGifFileName);
-    
+
+    if (uploadGif() && printToggle->getChecked()) { printQr(); }
     isGenerating    = false;
     generatingCount = 0;
     generateButton->setBackgroundColor(ofColor::fromHex(0xd8d8d8));
-    
+
     setStatusMessage("Generate completed.");
   }
+}
+
+bool ofApp::uploadGif()
+{
+  ofApp::setStatusMessage("Upload process has been started.");
+  ofSystem("scp -i " + ofFile(privateKeyPath).getAbsolutePath() + " " + outputPath + "/*.gif " + "clinique@45.76.192.168:/var/www/html/gif/");
+  return true;
 }
 
 void ofApp::printQr()
 {
   ofApp::setStatusMessage("Print process has been started.");
-}
-
-void ofApp::uploadGif()
-{
-  ofApp::setStatusMessage("Upload process has been started.");
 }
 
 void ofApp::selectGaraUpper(int kind)

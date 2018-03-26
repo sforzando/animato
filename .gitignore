@@ -108,4 +108,5 @@ Desktop.ini
 ### Misc. ###
 bin/data/output/
 bin/data/archive/
+id_rsa
 

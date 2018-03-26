@@ -32,8 +32,8 @@ public:
   void      capture();
   bool      cameraCheck();
   void      generateGif();
+  bool      uploadGif();
   void      printQr();
-  void      uploadGif();
 
   void      selectGaraUpper(int kind);
   void      selectGaraLower(int kind);
@@ -85,6 +85,7 @@ public:
   string                     outputPath;
   ofDirectory                archiveDirectory = ofDirectory("./archive");
   string                     archivePath;
+  string                     privateKeyPath = "./id_rsa";
 
   int            previewFps = 4;
   ofFbo          fbo;
@@ -96,4 +97,5 @@ public:
   ofPixels       pixels;
   ofImage        generatingImage;
 };
+
 
