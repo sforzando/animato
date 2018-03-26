@@ -52,13 +52,14 @@ public:
   bool   isGenerating          = false;
   int    generatingCount       = 0;
   string generateTimestamp     = "";
+  string generateGifFileName   = "";
 
   ofxDatGui            *gui;
   ofxDatGuiButton      *captureButton;
   ofxDatGuiButton      *loadButton;
   ofxDatGuiMatrix      *garaUpperMatrix;
   ofxDatGuiMatrix      *garaLowerMatrix;
-  ofxDatGuiButton      *exportButton;
+  ofxDatGuiButton      *generateButton;
   ofxDatGuiToggle      *printToggle;
   ofxDatGuiColorPicker *colorPicker;
   ofxDatGuiSlider      *previewFpsSlider;
@@ -89,3 +90,5 @@ public:
   ofPixels       pixels;
   ofImage        generatingImage;
 };
+
+

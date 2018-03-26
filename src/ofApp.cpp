@@ -23,37 +23,34 @@ void ofApp::setup()
 
   gui = new ofxDatGui(ofxDatGuiAnchor::TOP_RIGHT);
   gui->setTheme(new ofxDatGuiCustomFontSize);
-  captureButton = gui->addButton(" - [C]apture");
+  captureButton = gui->addButton("[C]apture");
   captureButton->onButtonEvent([&](ofxDatGuiButtonEvent e) {
     ofLog(OF_LOG_NOTICE, "onCaptureButton()");
     capture();
   });
-  loadButton = gui->addButton(" - [L]oad");
+  loadButton = gui->addButton("[L]oad");
   loadButton->onButtonEvent([&](ofxDatGuiButtonEvent e) {
     ofLog(OF_LOG_NOTICE, "onLoadButton()");
     loadPhoto();
   });
-  garaUpperMatrix = gui->addMatrix(" - Upper", garaUpperKinds);
+  garaUpperMatrix = gui->addMatrix("Upper", garaUpperKinds);
   garaUpperMatrix->setRadioMode(true);
   garaUpperMatrix->onMatrixEvent([&](ofxDatGuiMatrixEvent e) {
     ofLog(OF_LOG_NOTICE, "onLoadButton()");
     garaUpperCurrentKind = e.child;
     ofApp::setStatusMessage("Upper Gara has been changed to " + ofToString(e.child));
   });
-  garaLowerMatrix = gui->addMatrix(" - Lower", garaLowerKinds);
+  garaLowerMatrix = gui->addMatrix("Lower", garaLowerKinds);
   garaLowerMatrix->setRadioMode(true);
   garaLowerMatrix->onMatrixEvent([&](ofxDatGuiMatrixEvent e) {
     ofLog(OF_LOG_NOTICE, "onLoadButton()");
-    garaUpperCurrentKind = e.child;
+    garaLowerCurrentKind = e.child;
     ofApp::setStatusMessage("Lower Gara has been changed to " + ofToString(e.child));
   });
-  exportButton = gui->addButton(" - Export");
-  exportButton->onButtonEvent([&](ofxDatGuiButtonEvent e) {
-    ofLog(OF_LOG_NOTICE, "onExportBUtton()");
-    isGenerating = true;
-    generateTimestamp = ofGetTimestampString("%d%H%M%s");
-    exportButton->setBackgroundColor(ofColor(255, 0, 0));
-    ofApp::setStatusMessage("Export process has been started.");
+  generateButtonofcolor = gui->addButton("Generate");
+  generateButton->onButtonEvent([&](ofxDatGuiButtonEvent e) {
+    ofLog(OF_LOG_NOTICE, "onGenerateBUtton()");
+    ofApp::generateGif();
   });
   printToggle = gui->addToggle("  - with QR");
   printToggle->setChecked(true);
@@ -72,7 +69,7 @@ void ofApp::setup()
   });
   gui->addFRM();
   statusTextInput = gui->addTextInput("Status");
-  setStatusMessage("animato has been launched.");
+  setStatusMessage("Application has been launched.");
 
   fbo.allocate(gifRectangle.width, gifRectangle.height, GL_RGBA32F_ARB);
   backgroundMesh.setMode(OF_PRIMITIVE_TRIANGLE_FAN);
@@ -314,6 +311,11 @@ void ofApp::loadPhoto()
 
 void ofApp::generateGif()
 {
+  generateButton->setBackgroundColor(ofColor::fromHex(0xffd1cd));
+  ofApp::setStatusMessage("Generate process has been started.");
+
+  isGenerating = true;
+  generateTimestamp = ofGetTimestampString("%d%H%M%s");
   fbo.readToPixels(pixels);
   generatingImage.setFromPixels(pixels);
   generatingImage.save("output/" + generateTimestamp + "_" + ofToString(generatingCount, 2, '0') + ".png");
@@ -322,7 +324,8 @@ void ofApp::generateGif()
   } else {
     isGenerating    = false;
     generatingCount = 0;
-    setStatusMessage("Export completed.");
+    generateButton->setBackgroundColor(ofColor::fromHex(0xd8d8d8));
+    setStatusMessage("Generate completed.");
   }
 }
 
