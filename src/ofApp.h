@@ -55,7 +55,6 @@ public:
   bool   isGenerating          = false;
   int    generatingCount       = 0;
   string generateTimestamp     = "";
-  string generateGifFileName   = "";
 
   ofxDatGui            *gui;
   ofxDatGuiButton      *captureButton;

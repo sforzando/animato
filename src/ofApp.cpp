@@ -388,9 +388,8 @@ void ofApp::generateGif()
 
   ofSystem("cp -f " + outputPath + "/* " + archivePath + "/");  // Archive
 
-  isGenerating        = true;
-  generateTimestamp   = ofGetTimestampString("%d%H%M%s");
-  generateGifFileName = generateTimestamp + ".gif";
+  isGenerating      = true;
+  generateTimestamp = ofGetTimestampString("%d%H%M%s");
   fbo.readToPixels(pixels);
   generatingImage.setFromPixels(pixels);
   generatingImage.save(outputPath + "/" + ofToString(generatingCount, 2, '0') + ".png");
@@ -398,7 +397,7 @@ void ofApp::generateGif()
     generatingCount++;
   } else {
     ofSystem("/usr/local/bin/ffmpeg -i " + outputPath + "/00.png -vf palettegen -y " + outputPath + "/palette.png");  // Make Palette
-    ofSystem("/usr/local/bin/ffmpeg -f image2 -r " + ofToString(previewFps) + " -i " + outputPath + "/%02d.png -i " + outputPath + "/palette.png -filter_complex paletteuse " + outputPath + "/" + generateGifFileName);
+    ofSystem("/usr/local/bin/ffmpeg -f image2 -r " + ofToString(previewFps) + " -i " + outputPath + "/%02d.png -i " + outputPath + "/palette.png -filter_complex paletteuse " + outputPath + "/" + generateTimestamp + ".gif");
 
     if (uploadGif() && printToggle->getChecked()) { printQr(); }
     isGenerating    = false;
@@ -413,12 +412,15 @@ bool ofApp::uploadGif()
 {
   ofApp::setStatusMessage("Upload process has been started.");
   ofSystem("scp -i " + ofFile(privateKeyPath).getAbsolutePath() + " " + outputPath + "/*.gif " + "clinique@45.76.192.168:/var/www/html/gif/");
+
   return true;
 }
 
 void ofApp::printQr()
 {
   ofApp::setStatusMessage("Print process has been started.");
+  ofSystem("/usr/local/bin/qrencode -o " + outputPath + "/qr.png -m 2 'http://45.76.192.168/index.php/?id=" + generateTimestamp + "'");
+  ofSystem("lpr -o media=DC20 -o PageSize=DC20 -o fitplot " + outputPath + "/qr.png");
 }
 
 void ofApp::selectGaraUpper(int kind)
