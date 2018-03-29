@@ -2,7 +2,18 @@
 
 void ofApp::setup()
 {
-  ofLogToFile(ofGetTimestampString("%Y%m%d") + ".log", true);
+  if (!archiveDirectory.exists()) {
+    archiveDirectory.create();
+  }
+  archivePath = archiveDirectory.getAbsolutePath();
+  if (!outputDirectory.exists()) {
+    outputDirectory.create();
+  }
+  outputPath = outputDirectory.getAbsolutePath();
+  if (!logDirectory.exists()) {
+    logDirectory.create();
+  }
+  ofLogToFile("log/" + ofGetTimestampString("%Y%m%d") + ".log", true);
   ofSetWindowTitle("");
   ofSetVerticalSync(true);
   ofSetFrameRate(previewFps);
@@ -10,6 +21,7 @@ void ofApp::setup()
   gifRectangle.setSize(1080, 1080);
   previewRectangle.setSize(ofGetHeight(), ofGetHeight());
   pictureRectangle.setSize(360, 360);
+  ofLog() << "pwd: " << ofSystem("pwd");
 
   loadGara();
   loadHamon();
@@ -29,17 +41,22 @@ void ofApp::setup()
   garaUpperMatrix = gui->addMatrix("Upper", garaUpperKinds);
   garaUpperMatrix->setRadioMode(true);
   garaUpperMatrix->onMatrixEvent([&](ofxDatGuiMatrixEvent e) {
-    ofLog(OF_LOG_NOTICE, "onLoadButton()");
-    garaUpperCurrentKind = e.child;
-    ofApp::setStatusMessage("Upper Gara has been changed to " + ofToString(e.child));
+    ofLog(OF_LOG_NOTICE, "onGaraUpperMatrix()");
+    ofApp::selectGaraUpper(e.child);
   });
   garaLowerMatrix = gui->addMatrix("Lower", garaLowerKinds);
   garaLowerMatrix->setRadioMode(true);
   garaLowerMatrix->onMatrixEvent([&](ofxDatGuiMatrixEvent e) {
-    ofLog(OF_LOG_NOTICE, "onLoadButton()");
-    garaUpperCurrentKind = e.child;
-    ofApp::setStatusMessage("Lower Gara has been changed to " + ofToString(e.child));
+    ofLog(OF_LOG_NOTICE, "onGaraLowerMatrix()");
+    ofApp::selectGaraLower(e.child);
   });
+  generateButton = gui->addButton("[G]enerate");
+  generateButton->onButtonEvent([&](ofxDatGuiButtonEvent e) {
+    ofLog(OF_LOG_NOTICE, "onGenerateBUtton()");
+    ofApp::generateGif();
+  });
+  printToggle = gui->addToggle("  - with QR");
+  printToggle->setChecked(true);
   colorPicker = gui->addColorPicker("Key Color");
   colorPicker->setColor(keyColor);
   colorPicker->onColorPickerEvent([&](ofxDatGuiColorPickerEvent e) {
@@ -55,7 +72,7 @@ void ofApp::setup()
   });
   gui->addFRM();
   statusTextInput = gui->addTextInput("Status");
-  setStatusMessage("animato has been launched.");
+  setStatusMessage("Application has been launched.");
 
   fbo.allocate(gifRectangle.width, gifRectangle.height, GL_RGBA32F_ARB);
   backgroundMesh.setMode(OF_PRIMITIVE_TRIANGLE_FAN);
@@ -70,7 +87,7 @@ void ofApp::update()
     pictureImage.clear();
     pictureImage.setFromPixels(picturePixel, photo.getCaptureWidth(), photo.getCaptureHeight(), OF_IMAGE_COLOR, 0);
     pictureImage.resize(pictureRectangle.width, pictureRectangle.height);
-    setStatusMessage("Loading of the photo has been completed.");
+    setStatusMessage("Loading of the photo completed.");
     isPhotoLoaded = true;
   }
   fbo.begin();
@@ -101,6 +118,9 @@ void ofApp::draw()
 {
   ofBackgroundHex(0x000000);
   fbo.draw(0, 0, previewRectangle.width, previewRectangle.height);
+  if (isGenerating) {
+    generateGif();
+  }
 }
 
 void ofApp::keyPressed(int key)
@@ -112,6 +132,72 @@ void ofApp::keyPressed(int key)
       break;
     case 'l':
       loadPhoto();
+      break;
+    case 'g':
+      generateGif();
+      break;
+    case OF_KEY_RETURN:
+      generateGif();
+      break;
+    case '/':
+      printQr();
+      break;
+    case '1':
+      selectGaraUpper(0);
+      break;
+    case '2':
+      selectGaraUpper(1);
+      break;
+    case '3':
+      selectGaraUpper(2);
+      break;
+    case '4':
+      selectGaraUpper(3);
+      break;
+    case '5':
+      selectGaraUpper(4);
+      break;
+    case '6':
+      selectGaraUpper(5);
+      break;
+    case '7':
+      selectGaraUpper(6);
+      break;
+    case '8':
+      selectGaraUpper(7);
+      break;
+    case '9':
+      selectGaraUpper(8);
+      break;
+    case 'q':
+      selectGaraLower(0);
+      break;
+    case 'w':
+      selectGaraLower(1);
+      break;
+    case 'e':
+      selectGaraLower(2);
+      break;
+    case 'r':
+      selectGaraLower(3);
+      break;
+    case 't':
+      selectGaraLower(4);
+      break;
+    case 'y':
+      selectGaraLower(5);
+      break;
+    case 'u':
+      selectGaraLower(6);
+      break;
+    case 'i':
+      selectGaraLower(7);
+      break;
+    case 'o':
+      selectGaraLower(8);
+      break;
+    case 'p':
+      selectGaraLower(9);
       break;
     default:
       break;
@@ -150,7 +236,7 @@ void ofApp::mouseExited(int x, int y)
 void ofApp::windowResized(int w, int h)
 {
   ofLog(OF_LOG_NOTICE, "windowResized()");
-  gui->setWidth(ofGetWidth() - ofGetHeight());
+  if ((360 < ofGetWidth() - ofGetHeight())) {  gui->setWidth(ofGetWidth() - ofGetHeight()); } else {  gui->setWidth(360); }
   windowRectangle.setSize(ofGetWidth(), ofGetHeight());
   previewRectangle.setSize(windowRectangle.height, windowRectangle.height);
 }
@@ -212,15 +298,17 @@ ofVboMesh ofApp::getBackground()
 void ofApp::loadGara()
 {
   ofLog(OF_LOG_NOTICE, "loadGara()");
+
   garaUpperKinds = garaUpperDirectory.listDir();
   garaUpperVector.resize(garaUpperKinds);
+  garaUpperDirectory.sort();
   for (int i = 0; i < garaUpperKinds; i++) {
     ofDirectory      d       = ofDirectory(garaUpperDirectory.getPath(i));
     int              garaNum = d.listDir();
     vector <ofImage> v(garaNum);
     for (int j = 0; j < garaNum; j++) {
       string path = d.getPath(j);
-      ofLog() << "upper: " << path;
+      ofLog() << "Upper Gara: " << path;
       v[j] = ofImage(path);
     }
     garaUpperVector[i] = v;
@@ -228,20 +316,21 @@ void ofApp::loadGara()
 
   garaLowerKinds = garaLowerDirectory.listDir();
   garaLowerVector.resize(garaLowerKinds);
+  garaLowerDirectory.sort();
   for (int i = 0; i < garaLowerKinds; i++) {
     ofDirectory      d       = ofDirectory(garaLowerDirectory.getPath(i));
     int              garaNum = d.listDir();
     vector <ofImage> v(garaNum);
     for (int j = 0; j < garaNum; j++) {
       string path = d.getPath(j);
-      ofLog() << "lower: " << path;
+      ofLog() << "Lower Gara: " << path;
       v[j] = ofImage(path);
     }
     garaLowerVector[i] = v;
   }
 
   isGaraLoaded = true;
-  setStatusMessage("Loading of Japanese patterns has been completed.");
+  setStatusMessage("Loading of Japanese patterns completed.");
 }
 
 void ofApp::loadHamon()
@@ -253,7 +342,7 @@ void ofApp::loadHamon()
     hamonImages[i].load(hamonDirectory.getPath(i));
   }
   isHamonLoaded = true;
-  setStatusMessage("Loading of moisture patterns has been completed.");
+  setStatusMessage("Loading of moisture patterns completed.");
 }
 
 void ofApp::capture()
@@ -292,6 +381,72 @@ void ofApp::loadPhoto()
   }
 }
 
+void ofApp::generateGif()
+{
+  ofApp::setStatusMessage("Generate process has been started.");
+
+  ofSystem("cp -f " + outputPath + "/* " + archivePath + "/");  // Archive
+
+  isGenerating      = true;
+  generateTimestamp = ofGetTimestampString("%d%H%M%s");
+  fbo.readToPixels(pixels);
+  generatingImage.setFromPixels(pixels);
+  generatingImage.save(outputPath + "/" + ofToString(generatingCount, 2, '0') + ".png");
+  if (generatingCount < previewFps * resultSeconds) {
+    generatingCount++;
+  } else {
+    ofSystem("/usr/local/bin/ffmpeg -i " + outputPath + "/00.png -vf palettegen -y " + outputPath + "/palette.png");  // Make Palette
+    ofSystem("/usr/local/bin/ffmpeg -f image2 -r " + ofToString(previewFps) + " -i " + outputPath + "/%02d.png -i " + outputPath + "/palette.png -filter_complex paletteuse " + outputPath + "/" + generateTimestamp + ".gif");
+
+    if (uploadGif() && printToggle->getChecked()) { printQr(); }
+    isGenerating    = false;
+    generatingCount = 0;
+
+    setStatusMessage("Generate completed.");
+  }
+}
+
+bool ofApp::uploadGif()
+{
+  ofApp::setStatusMessage("Upload process has been started.");
+  ofSystem("scp -i " + ofFile(privateKeyPath).getAbsolutePath() + " " + outputPath + "/*.gif " + "clinique@45.76.192.168:/var/www/html/gif/");
+
+  return true;
+}
+
+void ofApp::printQr()
+{
+  ofApp::setStatusMessage("Print process has been started.");
+  ofSystem("/usr/local/bin/qrencode -o " + outputPath + "/qr.png -m 2 'http://45.76.192.168/index.php/?id=" + generateTimestamp + "'");
+  ofSystem("lpr -o media=DC20 -o PageSize=DC20 -o fitplot " + outputPath + "/qr.png");
+}
+
+void ofApp::selectGaraUpper(int kind)
+{
+  for (int i = 0; i < garaUpperKinds; i++) {
+    if (i == kind) {
+      garaUpperMatrix->getChildAt(i)->setSelected(true);
+    } else {
+      garaUpperMatrix->getChildAt(i)->setSelected(false);
+    }
+  }
+  garaUpperCurrentKind = kind;
+  setStatusMessage("Upper Gara has been changed to " + ofToString(kind));
+}
+
+void ofApp::selectGaraLower(int kind)
+{
+  for (int i = 0; i < garaLowerKinds; i++) {
+    if (i == kind) {
+      garaLowerMatrix->getChildAt(i)->setSelected(true);
+    } else {
+      garaLowerMatrix->getChildAt(i)->setSelected(false);
+    }
+  }
+  garaLowerCurrentKind = kind;
+  setStatusMessage("Lower Gara has been changed to " + ofToString(kind));
+}
+
 void ofApp::setStatusMessage(string s, ofLogLevel level)
 {
   ofLog(level, s);
@@ -305,3 +460,5 @@ void ofApp::say(string s)
 {
   sysCommand.callCommand("say -v Alex " + s);
 }
+
+

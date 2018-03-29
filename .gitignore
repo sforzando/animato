@@ -104,3 +104,9 @@ Desktop.ini
 
 
 # End of https://www.gitignore.io/api/osx,openframeworks
+
+### Misc. ###
+bin/data/output/
+bin/data/archive/
+id_rsa
+

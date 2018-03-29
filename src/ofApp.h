@@ -31,6 +31,12 @@ public:
   void      loadHamon();
   void      capture();
   bool      cameraCheck();
+  void      generateGif();
+  bool      uploadGif();
+  void      printQr();
+
+  void      selectGaraUpper(int kind);
+  void      selectGaraLower(int kind);
 
   void      setStatusMessage(string s, ofLogLevel level=OF_LOG_NOTICE);
   void      say(string s);
@@ -42,16 +48,21 @@ public:
   ofRectangle previewRectangle;
   ofRectangle pictureRectangle;
 
-  bool isPhotoLoaded         = false;
-  bool isBackgroundGenerated = false;
-  bool isGaraLoaded          = false;
-  bool isHamonLoaded         = false;
+  bool   isPhotoLoaded         = false;
+  bool   isBackgroundGenerated = false;
+  bool   isGaraLoaded          = false;
+  bool   isHamonLoaded         = false;
+  bool   isGenerating          = false;
+  int    generatingCount       = 0;
+  string generateTimestamp     = "";
 
   ofxDatGui            *gui;
   ofxDatGuiButton      *captureButton;
   ofxDatGuiButton      *loadButton;
   ofxDatGuiMatrix      *garaUpperMatrix;
   ofxDatGuiMatrix      *garaLowerMatrix;
+  ofxDatGuiButton      *generateButton;
+  ofxDatGuiToggle      *printToggle;
   ofxDatGuiColorPicker *colorPicker;
   ofxDatGuiSlider      *previewFpsSlider;
   ofxDatGuiTextInput   *statusTextInput;
@@ -67,13 +78,25 @@ public:
   ofDirectory                hamonDirectory       = ofDirectory(ofToDataPath("./materials/hamon"));
   vector <ofImage>           hamonImages;
   int                        hamonNum;
-  ofImage                    mojiImage = ofImage("./materials/moji.png");
+  ofImage                    mojiImage       = ofImage("./materials/moji.png");
+  ofDirectory                logDirectory    = ofDirectory("./log");
+  ofDirectory                outputDirectory = ofDirectory("./output");
+  string                     outputPath;
+  ofDirectory                archiveDirectory = ofDirectory("./archive");
+  string                     archivePath;
+  string                     privateKeyPath = "./id_rsa";
 
-  int            previewFps = 6;
+  int            previewFps    = 3;
+  int            resultSeconds = 8;
   ofFbo          fbo;
   ofxPhoto       photo;
   unsigned char *picturePixel;
   ofImage        pictureImage;
   ofColor        keyColor = ofColor::fromHex(0xffd1cd);
   ofVboMesh      backgroundMesh;
+  ofPixels       pixels;
+  ofImage        generatingImage;
 };
+
+
+
