@@ -383,7 +383,6 @@ void ofApp::loadPhoto()
 
 void ofApp::generateGif()
 {
-  generateButton->setBackgroundColor(ofColor::fromHex(0xffd1cd));
   ofApp::setStatusMessage("Generate process has been started.");
 
   ofSystem("cp -f " + outputPath + "/* " + archivePath + "/");  // Archive
@@ -393,7 +392,7 @@ void ofApp::generateGif()
   fbo.readToPixels(pixels);
   generatingImage.setFromPixels(pixels);
   generatingImage.save(outputPath + "/" + ofToString(generatingCount, 2, '0') + ".png");
-  if (generatingCount < previewFps) {
+  if (generatingCount < previewFps * resultSeconds) {
     generatingCount++;
   } else {
     ofSystem("/usr/local/bin/ffmpeg -i " + outputPath + "/00.png -vf palettegen -y " + outputPath + "/palette.png");  // Make Palette
@@ -402,7 +401,6 @@ void ofApp::generateGif()
     if (uploadGif() && printToggle->getChecked()) { printQr(); }
     isGenerating    = false;
     generatingCount = 0;
-    generateButton->setBackgroundColor(ofColor::fromHex(0xd8d8d8));
 
     setStatusMessage("Generate completed.");
   }

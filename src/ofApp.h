@@ -86,7 +86,8 @@ public:
   string                     archivePath;
   string                     privateKeyPath = "./id_rsa";
 
-  int            previewFps = 4;
+  int            previewFps    = 3;
+  int            resultSeconds = 8;
   ofFbo          fbo;
   ofxPhoto       photo;
   unsigned char *picturePixel;
@@ -96,5 +97,6 @@ public:
   ofPixels       pixels;
   ofImage        generatingImage;
 };
+
 
 
