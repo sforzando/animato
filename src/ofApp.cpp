@@ -78,7 +78,6 @@ void ofApp::update()
   fbo.begin();
   ofClear(0);
   ofDisableSmoothing();
-  ofEnableBlendMode(OF_BLENDMODE_ADD);
   ofEnableAlphaBlending();
   if (isPhotoLoaded) {
     getBackground().drawFaces();
@@ -91,7 +90,9 @@ void ofApp::update()
     garaLowerVector[garaLowerCurrentKind][currentLowerFrame].draw(0, 0);
   }
   if (isHamonLoaded) {
+    ofEnableBlendMode(OF_BLENDMODE_ADD);
     hamonImages[ofGetFrameNum() % hamonNum].draw(0, 0);
+    ofEnableAlphaBlending();
   }
   mojiImage.draw(0, 0);
   ofDisableAlphaBlending();
@@ -191,34 +192,10 @@ void ofApp::keyReleased(int key)
   ofLogNotice() << "keyReleased(): " << ofToString(key);
 }
 
-void ofApp::mouseMoved(int x, int y)
-{
-}
-
-void ofApp::mouseDragged(int x, int y, int button)
-{
-}
-
-void ofApp::mousePressed(int x, int y, int button)
-{
-}
-
-void ofApp::mouseReleased(int x, int y, int button)
-{
-}
-
-void ofApp::mouseEntered(int x, int y)
-{
-}
-
-void ofApp::mouseExited(int x, int y)
-{
-}
-
 void ofApp::windowResized(int w, int h)
 {
   ofLog(OF_LOG_NOTICE, "windowResized()");
-  if ((360 < ofGetWidth() - ofGetHeight())) {  gui->setWidth(ofGetWidth() - ofGetHeight()); } else {  gui->setWidth(360); }
+  if ((GUI_MIN_WIDTH < ofGetWidth() - ofGetHeight())) {  gui->setWidth(ofGetWidth() - ofGetHeight()); } else {  gui->setWidth(GUI_MIN_WIDTH); }
   windowRectangle.setSize(ofGetWidth(), ofGetHeight());
   previewRectangle.setSize(windowRectangle.height, windowRectangle.height);
 }
@@ -349,7 +326,7 @@ void ofApp::generateGif()
   fbo.readToPixels(pixels);
   generatingImage.setFromPixels(pixels);
   generatingImage.save(outputPath + "/" + ofToString(generatingCount, 2, '0') + ".png");
-  if (generatingCount < previewFps * resultSeconds) {
+  if (generatingCount < resultFrames) {
     generatingCount++;
   } else {
     ofSystem("/usr/local/bin/ffmpeg -i " + outputPath + "/00.png -vf palettegen -y " + outputPath + "/palette.png");  // Make Palette
