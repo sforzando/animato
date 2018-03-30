@@ -3,7 +3,6 @@
 #include "ofMain.h"
 #include "ofxDatGui.h"
 #include "ofxDatGuiCustomFontSize.h"
-#include "ofxPhoto.h"
 #include "SysCommand.h"
 
 class ofApp : public ofBaseApp {
@@ -57,7 +56,6 @@ public:
   string generateTimestamp     = "";
 
   ofxDatGui            *gui;
-  ofxDatGuiButton      *captureButton;
   ofxDatGuiButton      *loadButton;
   ofxDatGuiMatrix      *garaUpperMatrix;
   ofxDatGuiMatrix      *garaLowerMatrix;
@@ -89,7 +87,6 @@ public:
   int            previewFps    = 3;
   int            resultSeconds = 8;
   ofFbo          fbo;
-  ofxPhoto       photo;
   unsigned char *picturePixel;
   ofImage        pictureImage;
   ofColor        keyColor = ofColor::fromHex(0xffd1cd);
