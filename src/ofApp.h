@@ -3,23 +3,19 @@
 #include "ofMain.h"
 #include "ofxDatGui.h"
 #include "ofxDatGuiCustomFontSize.h"
-#include "ofxPhoto.h"
 #include "SysCommand.h"
 
 class ofApp : public ofBaseApp {
 public:
+  const string SERVER_URL = "photo.moisturesurge72.jp";
+  const int GUI_MIN_WIDTH = 360;
+
   void      setup();
   void      update();
   void      draw();
 
   void      keyPressed(int key);
   void      keyReleased(int key);
-  void      mouseMoved(int x, int y);
-  void      mouseDragged(int x, int y, int button);
-  void      mousePressed(int x, int y, int button);
-  void      mouseReleased(int x, int y, int button);
-  void      mouseEntered(int x, int y);
-  void      mouseExited(int x, int y);
   void      windowResized(int w, int h);
   void      dragEvent(ofDragInfo dragInfo);
   void      gotMessage(ofMessage msg);
@@ -30,7 +26,6 @@ public:
   void      loadGara();
   void      loadHamon();
   void      capture();
-  bool      cameraCheck();
   void      generateGif();
   bool      uploadGif();
   void      printQr();
@@ -54,10 +49,10 @@ public:
   bool   isHamonLoaded         = false;
   bool   isGenerating          = false;
   int    generatingCount       = 0;
+  int    resultFrames          = 8;
   string generateTimestamp     = "";
 
   ofxDatGui            *gui;
-  ofxDatGuiButton      *captureButton;
   ofxDatGuiButton      *loadButton;
   ofxDatGuiMatrix      *garaUpperMatrix;
   ofxDatGuiMatrix      *garaLowerMatrix;
@@ -86,10 +81,8 @@ public:
   string                     archivePath;
   string                     privateKeyPath = "./id_rsa";
 
-  int            previewFps    = 3;
-  int            resultSeconds = 8;
+  int            previewFps = 2;
   ofFbo          fbo;
-  ofxPhoto       photo;
   unsigned char *picturePixel;
   ofImage        pictureImage;
   ofColor        keyColor = ofColor::fromHex(0xffd1cd);
@@ -97,6 +90,8 @@ public:
   ofPixels       pixels;
   ofImage        generatingImage;
 };
+
+
 
 
 

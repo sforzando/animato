@@ -28,11 +28,6 @@ void ofApp::setup()
 
   gui = new ofxDatGui(ofxDatGuiAnchor::TOP_RIGHT);
   gui->setTheme(new ofxDatGuiCustomFontSize);
-  captureButton = gui->addButton("[C]apture");
-  captureButton->onButtonEvent([&](ofxDatGuiButtonEvent e) {
-    ofLog(OF_LOG_NOTICE, "onCaptureButton()");
-    capture();
-  });
   loadButton = gui->addButton("[L]oad");
   loadButton->onButtonEvent([&](ofxDatGuiButtonEvent e) {
     ofLog(OF_LOG_NOTICE, "onLoadButton()");
@@ -76,24 +71,13 @@ void ofApp::setup()
 
   fbo.allocate(gifRectangle.width, gifRectangle.height, GL_RGBA32F_ARB);
   backgroundMesh.setMode(OF_PRIMITIVE_TRIANGLE_FAN);
-
-  photo.init();
 }
 
 void ofApp::update()
 {
-  if (photo.captureSucceeded()) {
-    picturePixel = photo.capture();
-    pictureImage.clear();
-    pictureImage.setFromPixels(picturePixel, photo.getCaptureWidth(), photo.getCaptureHeight(), OF_IMAGE_COLOR, 0);
-    pictureImage.resize(pictureRectangle.width, pictureRectangle.height);
-    setStatusMessage("Loading of the photo completed.");
-    isPhotoLoaded = true;
-  }
   fbo.begin();
   ofClear(0);
   ofDisableSmoothing();
-  ofEnableBlendMode(OF_BLENDMODE_ADD);
   ofEnableAlphaBlending();
   if (isPhotoLoaded) {
     getBackground().drawFaces();
@@ -106,7 +90,9 @@ void ofApp::update()
     garaLowerVector[garaLowerCurrentKind][currentLowerFrame].draw(0, 0);
   }
   if (isHamonLoaded) {
+    ofEnableBlendMode(OF_BLENDMODE_ADD);
     hamonImages[ofGetFrameNum() % hamonNum].draw(0, 0);
+    ofEnableAlphaBlending();
   }
   mojiImage.draw(0, 0);
   ofDisableAlphaBlending();
@@ -127,9 +113,6 @@ void ofApp::keyPressed(int key)
 {
   ofLogNotice() << "keyPressed(): " << ofToString(key);
   switch (key) {
-    case 'c':
-      capture();
-      break;
     case 'l':
       loadPhoto();
       break;
@@ -209,34 +192,10 @@ void ofApp::keyReleased(int key)
   ofLogNotice() << "keyReleased(): " << ofToString(key);
 }
 
-void ofApp::mouseMoved(int x, int y)
-{
-}
-
-void ofApp::mouseDragged(int x, int y, int button)
-{
-}
-
-void ofApp::mousePressed(int x, int y, int button)
-{
-}
-
-void ofApp::mouseReleased(int x, int y, int button)
-{
-}
-
-void ofApp::mouseEntered(int x, int y)
-{
-}
-
-void ofApp::mouseExited(int x, int y)
-{
-}
-
 void ofApp::windowResized(int w, int h)
 {
   ofLog(OF_LOG_NOTICE, "windowResized()");
-  if ((360 < ofGetWidth() - ofGetHeight())) {  gui->setWidth(ofGetWidth() - ofGetHeight()); } else {  gui->setWidth(360); }
+  if ((GUI_MIN_WIDTH < ofGetWidth() - ofGetHeight())) {  gui->setWidth(ofGetWidth() - ofGetHeight()); } else {  gui->setWidth(GUI_MIN_WIDTH); }
   windowRectangle.setSize(ofGetWidth(), ofGetHeight());
   previewRectangle.setSize(windowRectangle.height, windowRectangle.height);
 }
@@ -252,7 +211,6 @@ void ofApp::gotMessage(ofMessage msg)
 
 void ofApp::exit()
 {
-  photo.exit();
 }
 
 ofVboMesh ofApp::getBackground()
@@ -345,30 +303,6 @@ void ofApp::loadHamon()
   setStatusMessage("Loading of moisture patterns completed.");
 }
 
-void ofApp::capture()
-{
-  ofLog(OF_LOG_NOTICE, "capture()");
-  isPhotoLoaded         = false;
-  isBackgroundGenerated = false;
-  photo.exit();
-  cameraCheck();
-  photo.init();
-  if (photo.isBusy()) {
-    ofLog(OF_LOG_WARNING, "Camera is busy.");
-  } else {
-    photo.startCapture();
-  }
-}
-
-bool ofApp::cameraCheck()
-{
-  ofSystem("killall PTPCamera");
-  ofSystem("/usr/local/bin/gphoto2 --auto-detect");
-  sysCommand.callCommand("/usr/local/bin/gphoto2 --debug --summary");
-
-  return true;
-}
-
 void ofApp::loadPhoto()
 {
   ofLog(OF_LOG_NOTICE, "loadPhoto()");
@@ -392,7 +326,7 @@ void ofApp::generateGif()
   fbo.readToPixels(pixels);
   generatingImage.setFromPixels(pixels);
   generatingImage.save(outputPath + "/" + ofToString(generatingCount, 2, '0') + ".png");
-  if (generatingCount < previewFps * resultSeconds) {
+  if (generatingCount < resultFrames) {
     generatingCount++;
   } else {
     ofSystem("/usr/local/bin/ffmpeg -i " + outputPath + "/00.png -vf palettegen -y " + outputPath + "/palette.png");  // Make Palette
