@@ -2,26 +2,46 @@
 
 void ofApp::setup()
 {
-  if (!archiveDirectory.exists()) {
+  // Load Settings
+  settings.loadFile(settingsXmlPath);
+  serverUrl = settings.getValue("serverUrl", "photo.moisturesurge72.jp");
+  garaUpperDirectory = ofDirectory(settings.getValue("garaUpperDirectoryPath", "./materials/gara/upper"));
+  garaLowerDirectory = ofDirectory(settings.getValue("garaLowerDirectoryPath", "./materials/gara/lower"));
+  hamonDirectory = ofDirectory(settings.getValue("hamonDirectoryPath", "./materials/hamon"));
+  mojiImage = ofImage(settings.getValue("mojiImagePath", "./materials/moji.png"));
+  gifWidth = settings.getValue("gifWidth", 1080);
+  gifHeight = settings.getValue("gifHeight", 1080);
+  pictureWidth = settings.getValue("pictureWidth", 360);
+  pictureHeight = settings.getValue("pictureHeight", 360);
+  outputDirectory = ofDirectory(settings.getValue("outputDirectoryPath", "./output"));
+  archiveDirectory = ofDirectory(settings.getValue("archiveDirectoryPathPath", "./archive"));
+  privateKeyPath = settings.setValue("privateKeyPath", "./id_rsa");
+  resultFrames = settings.setValue("resultFrames", 8);
+  previewFps = settings.getValue("previewFps", 2);
+  keyColor = ofColor::fromHex(settings.getValue("keyColor", 0xffd1cd));
+
+  if (!archiveDirectory.exists())
+  {
     archiveDirectory.create();
   }
   archivePath = archiveDirectory.getAbsolutePath();
-  if (!outputDirectory.exists()) {
+  if (!outputDirectory.exists())
+  {
     outputDirectory.create();
   }
   outputPath = outputDirectory.getAbsolutePath();
-  if (!logDirectory.exists()) {
+  if (!logDirectory.exists())
+  {
     logDirectory.create();
   }
-  ofLogToFile("log/" + ofGetTimestampString("%Y%m%d") + ".log", true);
-  ofSetWindowTitle("");
+  ofLogToFile(logDirectory.getAbsolutePath() + "/" + ofGetTimestampString("%Y%m%d") + ".log", true);
+  ofSetWindowTitle("animato");
   ofSetVerticalSync(true);
   ofSetFrameRate(previewFps);
   windowRectangle.setSize(ofGetWidth(), ofGetHeight());
-  gifRectangle.setSize(1080, 1080);
+  gifRectangle.setSize(gifWidth, gifHeight);
   previewRectangle.setSize(ofGetHeight(), ofGetHeight());
-  pictureRectangle.setSize(360, 360);
-  ofLog() << "pwd: " << ofSystem("pwd");
+  pictureRectangle.setSize(pictureWidth, pictureHeight);
 
   loadGara();
   loadHamon();
@@ -56,7 +76,7 @@ void ofApp::setup()
   colorPicker->setColor(keyColor);
   colorPicker->onColorPickerEvent([&](ofxDatGuiColorPickerEvent e) {
     ofLog(OF_LOG_NOTICE, "onColorPicker()");
-    keyColor              = e.color;
+    keyColor = e.color;
     isBackgroundGenerated = false;
     ofApp::setStatusMessage("The Key Color has been changed.");
   });
@@ -79,17 +99,20 @@ void ofApp::update()
   ofClear(0);
   ofDisableSmoothing();
   ofEnableAlphaBlending();
-  if (isPhotoLoaded) {
+  if (isPhotoLoaded)
+  {
     getBackground().drawFaces();
     pictureImage.draw(gifRectangle.width - pictureRectangle.width, gifRectangle.height - pictureRectangle.height, pictureRectangle.width, pictureRectangle.height);
   }
-  if (isGaraLoaded) {
+  if (isGaraLoaded)
+  {
     int currentUpperFrame = ofGetFrameNum() % garaUpperVector[0].size();
     int currentLowerFrame = ofGetFrameNum() % garaLowerVector[0].size();
     garaUpperVector[garaUpperCurrentKind][currentUpperFrame].draw(0, 0);
     garaLowerVector[garaLowerCurrentKind][currentLowerFrame].draw(0, 0);
   }
-  if (isHamonLoaded) {
+  if (isHamonLoaded)
+  {
     ofEnableBlendMode(OF_BLENDMODE_ADD);
     hamonImages[ofGetFrameNum() % hamonNum].draw(0, 0);
     ofEnableAlphaBlending();
@@ -102,9 +125,10 @@ void ofApp::update()
 
 void ofApp::draw()
 {
-  ofBackgroundHex(0x000000);
+  ofBackgroundHex(0xffffff);
   fbo.draw(0, 0, previewRectangle.width, previewRectangle.height);
-  if (isGenerating) {
+  if (isGenerating)
+  {
     generateGif();
   }
 }
@@ -112,78 +136,79 @@ void ofApp::draw()
 void ofApp::keyPressed(int key)
 {
   ofLogNotice() << "keyPressed(): " << ofToString(key);
-  switch (key) {
-    case 'l':
-      loadPhoto();
-      break;
-    case 'g':
-      generateGif();
-      break;
-    case OF_KEY_RETURN:
-      generateGif();
-      break;
-    case '/':
-      printQr();
-      break;
-    case '1':
-      selectGaraUpper(0);
-      break;
-    case '2':
-      selectGaraUpper(1);
-      break;
-    case '3':
-      selectGaraUpper(2);
-      break;
-    case '4':
-      selectGaraUpper(3);
-      break;
-    case '5':
-      selectGaraUpper(4);
-      break;
-    case '6':
-      selectGaraUpper(5);
-      break;
-    case '7':
-      selectGaraUpper(6);
-      break;
-    case '8':
-      selectGaraUpper(7);
-      break;
-    case '9':
-      selectGaraUpper(8);
-      break;
-    case 'q':
-      selectGaraLower(0);
-      break;
-    case 'w':
-      selectGaraLower(1);
-      break;
-    case 'e':
-      selectGaraLower(2);
-      break;
-    case 'r':
-      selectGaraLower(3);
-      break;
-    case 't':
-      selectGaraLower(4);
-      break;
-    case 'y':
-      selectGaraLower(5);
-      break;
-    case 'u':
-      selectGaraLower(6);
-      break;
-    case 'i':
-      selectGaraLower(7);
-      break;
-    case 'o':
-      selectGaraLower(8);
-      break;
-    case 'p':
-      selectGaraLower(9);
-      break;
-    default:
-      break;
+  switch (key)
+  {
+  case 'l':
+    loadPhoto();
+    break;
+  case 'g':
+    generateGif();
+    break;
+  case OF_KEY_RETURN:
+    generateGif();
+    break;
+  case '/':
+    printQr();
+    break;
+  case '1':
+    selectGaraUpper(0);
+    break;
+  case '2':
+    selectGaraUpper(1);
+    break;
+  case '3':
+    selectGaraUpper(2);
+    break;
+  case '4':
+    selectGaraUpper(3);
+    break;
+  case '5':
+    selectGaraUpper(4);
+    break;
+  case '6':
+    selectGaraUpper(5);
+    break;
+  case '7':
+    selectGaraUpper(6);
+    break;
+  case '8':
+    selectGaraUpper(7);
+    break;
+  case '9':
+    selectGaraUpper(8);
+    break;
+  case 'q':
+    selectGaraLower(0);
+    break;
+  case 'w':
+    selectGaraLower(1);
+    break;
+  case 'e':
+    selectGaraLower(2);
+    break;
+  case 'r':
+    selectGaraLower(3);
+    break;
+  case 't':
+    selectGaraLower(4);
+    break;
+  case 'y':
+    selectGaraLower(5);
+    break;
+  case 'u':
+    selectGaraLower(6);
+    break;
+  case 'i':
+    selectGaraLower(7);
+    break;
+  case 'o':
+    selectGaraLower(8);
+    break;
+  case 'p':
+    selectGaraLower(9);
+    break;
+  default:
+    break;
   }
 }
 
@@ -195,13 +220,16 @@ void ofApp::keyReleased(int key)
 void ofApp::windowResized(int w, int h)
 {
   ofLog(OF_LOG_NOTICE, "windowResized()");
-  if ((GUI_MIN_WIDTH < ofGetWidth() - ofGetHeight())) {  gui->setWidth(ofGetWidth() - ofGetHeight()); } else {  gui->setWidth(GUI_MIN_WIDTH); }
+  if ((GUI_MIN_WIDTH < ofGetWidth() - ofGetHeight()))
+  {
+    gui->setWidth(ofGetWidth() - ofGetHeight());
+  }
+  else
+  {
+    gui->setWidth(GUI_MIN_WIDTH);
+  }
   windowRectangle.setSize(ofGetWidth(), ofGetHeight());
   previewRectangle.setSize(windowRectangle.height, windowRectangle.height);
-}
-
-void ofApp::dragEvent(ofDragInfo dragInfo)
-{
 }
 
 void ofApp::gotMessage(ofMessage msg)
@@ -211,34 +239,54 @@ void ofApp::gotMessage(ofMessage msg)
 
 void ofApp::exit()
 {
+  // Save Settings
+  settings.setValue("serverUrl", serverUrl);
+  settings.setValue("garaUpperDirectoryPath", "./materials/gara/upper");
+  settings.setValue("garaLowerDirectoryPath", "./materials/gara/lower");
+  settings.setValue("hamonDirectoryPath", "./materials/hamon");
+  settings.setValue("mojiImagePath", "./materials/moji.png");
+  settings.setValue("gifWidth", gifWidth);
+  settings.setValue("gifHeight", gifHeight);
+  settings.setValue("pictureWidth", pictureWidth);
+  settings.setValue("pictureHeight", pictureHeight);
+  settings.setValue("outputDirectoryPath", "./output");
+  settings.setValue("archiveDirectoryPathPath", "./archive");
+  settings.setValue("privateKeyPath", "./id_rsa");
+  settings.setValue("keyColor", keyColor.getHex());
+  settings.setValue("previewFps", previewFps);
+  settings.setValue("resultFrames", resultFrames);
+  settings.saveFile(settingsXmlPath);
 }
 
 ofVboMesh ofApp::getBackground()
 {
-  if (!isBackgroundGenerated) {
+  if (!isBackgroundGenerated)
+  {
     backgroundMesh.clear();
 
     // origin: TOP-LEFT
     backgroundMesh.addVertex(ofPoint(0, 0, 0));
     backgroundMesh.addColor(keyColor);
 
-
     // BOTTOM-LEFT
     backgroundMesh.addVertex(ofPoint(0, gifRectangle.height, 0));
     backgroundMesh.addColor(keyColor);
 
     // PICTURE-LEFT
-    for (int y = 0; y < pictureRectangle.height; y++) {
+    for (int y = 0; y < pictureRectangle.height; y++)
+    {
       backgroundMesh.addVertex(ofPoint(gifRectangle.width - pictureRectangle.width, gifRectangle.height - y, 0));
       backgroundMesh.addColor(pictureImage.getColor(0, (pictureRectangle.height - 1) - y));
-      if (y == 0) {
+      if (y == 0)
+      {
         ofLog() << pictureImage.getColor(0, pictureRectangle.height - y);
         ofLog() << pictureImage.getHeight();
       }
     }
 
     // PICTURE-TOP
-    for (int x = 0; x <= pictureRectangle.width; x++) {
+    for (int x = 0; x <= pictureRectangle.width; x++)
+    {
       backgroundMesh.addVertex(ofPoint(gifRectangle.width - pictureRectangle.width + x, gifRectangle.height - pictureRectangle.height, 0));
       backgroundMesh.addColor(pictureImage.getColor(x, 0));
     }
@@ -260,11 +308,13 @@ void ofApp::loadGara()
   garaUpperKinds = garaUpperDirectory.listDir();
   garaUpperVector.resize(garaUpperKinds);
   garaUpperDirectory.sort();
-  for (int i = 0; i < garaUpperKinds; i++) {
-    ofDirectory      d       = ofDirectory(garaUpperDirectory.getPath(i));
-    int              garaNum = d.listDir();
-    vector <ofImage> v(garaNum);
-    for (int j = 0; j < garaNum; j++) {
+  for (int i = 0; i < garaUpperKinds; i++)
+  {
+    ofDirectory d = ofDirectory(garaUpperDirectory.getPath(i));
+    int garaNum = d.listDir();
+    vector<ofImage> v(garaNum);
+    for (int j = 0; j < garaNum; j++)
+    {
       string path = d.getPath(j);
       ofLog() << "Upper Gara: " << path;
       v[j] = ofImage(path);
@@ -275,11 +325,13 @@ void ofApp::loadGara()
   garaLowerKinds = garaLowerDirectory.listDir();
   garaLowerVector.resize(garaLowerKinds);
   garaLowerDirectory.sort();
-  for (int i = 0; i < garaLowerKinds; i++) {
-    ofDirectory      d       = ofDirectory(garaLowerDirectory.getPath(i));
-    int              garaNum = d.listDir();
-    vector <ofImage> v(garaNum);
-    for (int j = 0; j < garaNum; j++) {
+  for (int i = 0; i < garaLowerKinds; i++)
+  {
+    ofDirectory d = ofDirectory(garaLowerDirectory.getPath(i));
+    int garaNum = d.listDir();
+    vector<ofImage> v(garaNum);
+    for (int j = 0; j < garaNum; j++)
+    {
       string path = d.getPath(j);
       ofLog() << "Lower Gara: " << path;
       v[j] = ofImage(path);
@@ -296,7 +348,8 @@ void ofApp::loadHamon()
   ofLog(OF_LOG_NOTICE, "loadingHamon()");
   hamonNum = hamonDirectory.listDir();
   hamonImages.resize(hamonNum);
-  for (int i = 0; i < hamonNum; i++) {
+  for (int i = 0; i < hamonNum; i++)
+  {
     hamonImages[i].load(hamonDirectory.getPath(i));
   }
   isHamonLoaded = true;
@@ -307,10 +360,11 @@ void ofApp::loadPhoto()
 {
   ofLog(OF_LOG_NOTICE, "loadPhoto()");
   ofFileDialogResult loadFileResult = ofSystemLoadDialog("Choose a photo");
-  if (loadFileResult.bSuccess) {
+  if (loadFileResult.bSuccess)
+  {
     pictureImage = ofImage(loadFileResult.getPath());
     pictureImage.resize(pictureRectangle.width, pictureRectangle.height);
-    isPhotoLoaded         = true;
+    isPhotoLoaded = true;
     isBackgroundGenerated = false;
   }
 }
@@ -319,21 +373,27 @@ void ofApp::generateGif()
 {
   ofApp::setStatusMessage("Generate process has been started.");
 
-  ofSystem("cp -f " + outputPath + "/* " + archivePath + "/");  // Archive
+  ofSystem("cp -f " + outputPath + "/* " + archivePath + "/"); // Archive
 
-  isGenerating      = true;
+  isGenerating = true;
   generateTimestamp = ofGetTimestampString("%d%H%M%s");
   fbo.readToPixels(pixels);
   generatingImage.setFromPixels(pixels);
   generatingImage.save(outputPath + "/" + ofToString(generatingCount, 2, '0') + ".png");
-  if (generatingCount < resultFrames) {
+  if (generatingCount < resultFrames)
+  {
     generatingCount++;
-  } else {
-    ofSystem("/usr/local/bin/ffmpeg -i " + outputPath + "/00.png -vf palettegen -y " + outputPath + "/palette.png");  // Make Palette
+  }
+  else
+  {
+    ofSystem("/usr/local/bin/ffmpeg -i " + outputPath + "/00.png -vf palettegen -y " + outputPath + "/palette.png"); // Make Palette
     ofSystem("/usr/local/bin/ffmpeg -f image2 -r " + ofToString(previewFps) + " -i " + outputPath + "/%02d.png -i " + outputPath + "/palette.png -filter_complex paletteuse " + outputPath + "/" + generateTimestamp + ".gif");
 
-    if (uploadGif() && printToggle->getChecked()) { printQr(); }
-    isGenerating    = false;
+    if (uploadGif() && printToggle->getChecked())
+    {
+      printQr();
+    }
+    isGenerating = false;
     generatingCount = 0;
 
     setStatusMessage("Generate completed.");
@@ -343,7 +403,7 @@ void ofApp::generateGif()
 bool ofApp::uploadGif()
 {
   ofApp::setStatusMessage("Upload process has been started.");
-  ofSystem("scp -i " + ofFile(privateKeyPath).getAbsolutePath() + " " + outputPath + "/*.gif " + "clinique@45.76.192.168:/var/www/html/gif/");
+  ofSystem("scp -i " + ofFile(privateKeyPath).getAbsolutePath() + " " + outputPath + "/*.gif " + "clinique@" + serverUrl + ":/var/www/html/gif/");
 
   return true;
 }
@@ -351,16 +411,20 @@ bool ofApp::uploadGif()
 void ofApp::printQr()
 {
   ofApp::setStatusMessage("Print process has been started.");
-  ofSystem("/usr/local/bin/qrencode -o " + outputPath + "/qr.png -m 2 'http://45.76.192.168/index.php/?id=" + generateTimestamp + "'");
+  ofSystem("/usr/local/bin/qrencode -lH -m 1 -o " + outputPath + "/qr.png 'http://" + serverUrl + "/index.php/?id=" + generateTimestamp + "'");
   ofSystem("lpr -o media=DC20 -o PageSize=DC20 -o fitplot " + outputPath + "/qr.png");
 }
 
 void ofApp::selectGaraUpper(int kind)
 {
-  for (int i = 0; i < garaUpperKinds; i++) {
-    if (i == kind) {
+  for (int i = 0; i < garaUpperKinds; i++)
+  {
+    if (i == kind)
+    {
       garaUpperMatrix->getChildAt(i)->setSelected(true);
-    } else {
+    }
+    else
+    {
       garaUpperMatrix->getChildAt(i)->setSelected(false);
     }
   }
@@ -370,10 +434,14 @@ void ofApp::selectGaraUpper(int kind)
 
 void ofApp::selectGaraLower(int kind)
 {
-  for (int i = 0; i < garaLowerKinds; i++) {
-    if (i == kind) {
+  for (int i = 0; i < garaLowerKinds; i++)
+  {
+    if (i == kind)
+    {
       garaLowerMatrix->getChildAt(i)->setSelected(true);
-    } else {
+    }
+    else
+    {
       garaLowerMatrix->getChildAt(i)->setSelected(false);
     }
   }
@@ -384,7 +452,8 @@ void ofApp::selectGaraLower(int kind)
 void ofApp::setStatusMessage(string s, ofLogLevel level)
 {
   ofLog(level, s);
-  if (statusTextInput != nil) {
+  if (statusTextInput != nil)
+  {
     statusTextInput->setText(s);
   }
   say(s);
@@ -394,5 +463,3 @@ void ofApp::say(string s)
 {
   sysCommand.callCommand("say -v Alex " + s);
 }
-
-
