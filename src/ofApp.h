@@ -23,7 +23,8 @@ public:
   void      gotMessage(ofMessage msg);
   void      exit();
 
-  ofVboMesh getBackground();
+  ofVboMesh getBackground_STRIP();
+  ofVboMesh getBackground_FAN();
   void      loadPhoto();
   void      loadGara();
   void      loadHamon();
@@ -36,7 +37,7 @@ public:
   void      selectGaraLower(int kind);
 
   void      setStatusMessage(string s, ofLogLevel level=OF_LOG_NOTICE);
-  void      say(string s);
+  void      say(string s, bool async=true);
 
   SysCommand sysCommand;
 

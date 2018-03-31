@@ -100,7 +100,7 @@ void ofApp::update()
   ofEnableAlphaBlending();
   if (isPhotoLoaded)
   {
-    getBackground().drawFaces();
+    getBackground_STRIP().drawFaces();
     pictureImage.draw(gifRectangle.width - pictureRectangle.width, gifRectangle.height - pictureRectangle.height, pictureRectangle.width, pictureRectangle.height);
   }
   if (isGaraLoaded)
@@ -257,7 +257,7 @@ void ofApp::exit()
   settings.saveFile(settingsXmlPath);
 }
 
-ofVboMesh ofApp::getBackground()
+ofVboMesh ofApp::getBackground_STRIP()
 {
   if (!isBackgroundGenerated)
   {
@@ -272,14 +272,10 @@ ofVboMesh ofApp::getBackground()
       backgroundMesh.addVertex(ofPoint(gifWidth - pictureWidth, gifHeight - h, 0));
       backgroundMesh.addColor(pictureImage.getColor(0, pictureHeight - h - 1));
       backgroundMesh.addVertex(ofPoint(gifWidth - pictureWidth, gifHeight - h - 1, 0));
-      backgroundMesh.addColor(pictureImage.getColor(0, pictureHeight - h - 2));
+      backgroundMesh.addColor(pictureImage.getColor(0, max(0, pictureHeight - h - 2)));
       backgroundMesh.addVertex(ofPoint(0, gifHeight - (h * (gifHeight / pictureHeight)), 0));
       backgroundMesh.addColor(keyColor);
     }
-    backgroundMesh.addVertex(ofPoint(0, 0, 0));
-    backgroundMesh.addColor(keyColor);
-    backgroundMesh.addVertex(ofPoint(gifWidth, gifHeight, 0));
-    backgroundMesh.addColor(pictureImage.getColor(0, 0));
 
     // TOP
     for (int w = 0; w < pictureWidth; w++) {
@@ -288,7 +284,7 @@ ofVboMesh ofApp::getBackground()
       backgroundMesh.addVertex(ofPoint(gifWidth - pictureWidth + w, gifHeight - pictureHeight, 0));
       backgroundMesh.addColor(pictureImage.getColor(w, 0));
       backgroundMesh.addVertex(ofPoint(gifWidth - pictureWidth + w + 1, gifHeight - pictureHeight, 0));
-      backgroundMesh.addColor(pictureImage.getColor(w + 1, 0));
+      backgroundMesh.addColor(pictureImage.getColor(min(pictureWidth - 1, w + 1), 0));
       backgroundMesh.addVertex(ofPoint(w * (gifWidth / pictureWidth), 0, 0));
       backgroundMesh.addColor(keyColor);
     }
@@ -297,39 +293,49 @@ ofVboMesh ofApp::getBackground()
     backgroundMesh.addVertex(ofPoint(gifWidth, gifHeight, 0));
     backgroundMesh.addColor(pictureImage.getColor(pictureWidth - 1, 0));
 
-    //    backgroundMesh.setMode(OF_PRIMITIVE_TRIANGLE_FAN);
-    //
-    //    // origin: TOP-LEFT
-    //    backgroundMesh.addVertex(ofPoint(0, 0, 0));
-    //    backgroundMesh.addColor(keyColor);
-    //
-    //    // BOTTOM-LEFT
-    //    backgroundMesh.addVertex(ofPoint(0, gifRectangle.height, 0));
-    //    backgroundMesh.addColor(keyColor);
-    //
-    //    // PICTURE-LEFT
-    //    for (int y = 0; y < pictureRectangle.height; y++)
-    //    {
-    //      backgroundMesh.addVertex(ofPoint(gifRectangle.width - pictureRectangle.width, gifRectangle.height - y, 0));
-    //      backgroundMesh.addColor(pictureImage.getColor(0, (pictureRectangle.height - 1) - y));
-    //      if (y == 0)
-    //      {
-    //        ofLog() << pictureImage.getColor(0, pictureRectangle.height - y);
-    //        ofLog() << pictureImage.getHeight();
-    //      }
-    //    }
-    //
-    //    // PICTURE-TOP
-    //    for (int x = 0; x <= pictureRectangle.width; x++)
-    //    {
-    //      backgroundMesh.addVertex(ofPoint(gifRectangle.width - pictureRectangle.width + x, gifRectangle.height - pictureRectangle.height, 0));
-    //      backgroundMesh.addColor(pictureImage.getColor(x, 0));
-    //    }
-    //
-    //    // TOP-RIGHT
-    //    backgroundMesh.addVertex(ofPoint(gifRectangle.width, 0, 0));
-    //    backgroundMesh.addColor(keyColor);
+    isBackgroundGenerated = true;
+  }
 
+  return backgroundMesh;
+}
+
+ofVboMesh ofApp::getBackground_FAN()
+{
+  if (!isBackgroundGenerated)
+  {
+    backgroundMesh.clear();
+    backgroundMesh.setMode(OF_PRIMITIVE_TRIANGLE_FAN);
+
+    // origin: TOP-LEFT
+    backgroundMesh.addVertex(ofPoint(0, 0, 0));
+    backgroundMesh.addColor(keyColor);
+
+    // BOTTOM-LEFT
+    backgroundMesh.addVertex(ofPoint(0, gifRectangle.height, 0));
+    backgroundMesh.addColor(keyColor);
+
+    // PICTURE-LEFT
+    for (int y = 0; y < pictureRectangle.height; y++)
+    {
+      backgroundMesh.addVertex(ofPoint(gifRectangle.width - pictureRectangle.width, gifRectangle.height - y, 0));
+      backgroundMesh.addColor(pictureImage.getColor(0, (pictureRectangle.height - 1) - y));
+      if (y == 0)
+      {
+        ofLog() << pictureImage.getColor(0, pictureRectangle.height - y);
+        ofLog() << pictureImage.getHeight();
+      }
+    }
+
+    // PICTURE-TOP
+    for (int x = 0; x <= pictureRectangle.width; x++)
+    {
+      backgroundMesh.addVertex(ofPoint(gifRectangle.width - pictureRectangle.width + x, gifRectangle.height - pictureRectangle.height, 0));
+      backgroundMesh.addColor(pictureImage.getColor(x, 0));
+    }
+
+    // TOP-RIGHT
+    backgroundMesh.addVertex(ofPoint(gifRectangle.width, 0, 0));
+    backgroundMesh.addColor(keyColor);
     isBackgroundGenerated = true;
   }
 
@@ -401,17 +407,20 @@ void ofApp::loadPhoto()
     pictureImage.resize(pictureRectangle.width, pictureRectangle.height);
     isPhotoLoaded         = true;
     isBackgroundGenerated = false;
+    setStatusMessage("Loading photo completed.");
   }
 }
 
 void ofApp::generateGif()
 {
-  ofApp::setStatusMessage("Generate process has been started.");
+  isGenerating = true;
 
-  ofSystem("cp -f " + outputPath + "/* " + archivePath + "/"); // Archive
+  if (generatingCount == 0) {
+    setStatusMessage("Generate process has been started.");
+    ofSystem("cp -f " + outputPath + "/* " + archivePath + "/"); // Archive
+    generateTimestamp = ofGetTimestampString("%d%H%M%s");
+  }
 
-  isGenerating      = true;
-  generateTimestamp = ofGetTimestampString("%d%H%M%s");
   if (generatingCount < resultFrames)
   {
     fbo.readToPixels(pixels);
@@ -431,25 +440,27 @@ void ofApp::generateGif()
     isGenerating    = false;
     generatingCount = 0;
 
-    setStatusMessage("Generate completed.");
+    setStatusMessage("Generate process completed.");
   }
 }
 
 bool ofApp::uploadGif()
 {
-  ofApp::setStatusMessage("Upload process has been started.");
+  setStatusMessage("Upload process has been started.");
   string command = "scp -i " + ofFile(privateKeyPath).getAbsolutePath() + " " + outputPath + "/*.gif " + "clinique@" + serverUrl + ":/var/www/html/gif/";
   cout << command;
   ofSystem("scp -i " + ofFile(privateKeyPath).getAbsolutePath() + " " + outputPath + "/*.gif " + "clinique@" + serverUrl + ":/var/www/html/gif/");
+  setStatusMessage("Upload process completed.");
 
   return true;
 }
 
 void ofApp::printQr()
 {
-  ofApp::setStatusMessage("Print process has been started.");
+  setStatusMessage("Print process has been started.");
   ofSystem("/usr/local/bin/qrencode -lH -m 1 -o " + outputPath + "/qr.png 'http://" + serverUrl + "/index.php/?id=" + generateTimestamp + "'");
   ofSystem("lpr -o media=DC20 -o PageSize=DC20 -o fitplot " + outputPath + "/qr.png");
+  setStatusMessage("Print process completed.");
 }
 
 void ofApp::selectGaraUpper(int kind)
@@ -496,8 +507,12 @@ void ofApp::setStatusMessage(string s, ofLogLevel level)
   say(s);
 }
 
-void ofApp::say(string s)
+void ofApp::say(string s, bool async)
 {
-  sysCommand.callCommand("say -v Alex " + s);
+  if (async) {
+    sysCommand.callCommand("say -v Alex " + s);
+  } else {
+    ofSystem("say -v Alex " + s);
+  }
 }
 
