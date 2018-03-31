@@ -4,21 +4,21 @@ void ofApp::setup()
 {
   // Load Settings
   settings.loadFile(settingsXmlPath);
-  serverUrl          = settings.getValue("serverUrl", "photo.moisturesurge72.jp");
+  serverUrl = settings.getValue("serverUrl", "photo.moisturesurge72.jp");
   garaUpperDirectory = ofDirectory(settings.getValue("garaUpperDirectoryPath", "./materials/gara/upper"));
   garaLowerDirectory = ofDirectory(settings.getValue("garaLowerDirectoryPath", "./materials/gara/lower"));
-  hamonDirectory     = ofDirectory(settings.getValue("hamonDirectoryPath", "./materials/hamon"));
-  mojiImage          = ofImage(settings.getValue("mojiImagePath", "./materials/moji.png"));
-  gifWidth           = settings.getValue("gifWidth", 1080);
-  gifHeight          = settings.getValue("gifHeight", 1080);
-  pictureWidth       = settings.getValue("pictureWidth", 360);
-  pictureHeight      = settings.getValue("pictureHeight", 360);
-  outputDirectory    = ofDirectory(settings.getValue("outputDirectoryPath", "./output"));
-  archiveDirectory   = ofDirectory(settings.getValue("archiveDirectoryPathPath", "./archive"));
-  privateKeyPath     = settings.setValue("privateKeyPath", "./id_rsa");
-  resultFrames       = settings.setValue("resultFrames", 8);
-  previewFps         = settings.getValue("previewFps", 2);
-  keyColor           = ofColor::fromHex(settings.getValue("keyColor", 0xffd1cd));
+  hamonDirectory = ofDirectory(settings.getValue("hamonDirectoryPath", "./materials/hamon"));
+  mojiImage = ofImage(settings.getValue("mojiImagePath", "./materials/moji.png"));
+  gifWidth = settings.getValue("gifWidth", 1080);
+  gifHeight = settings.getValue("gifHeight", 1080);
+  pictureWidth = settings.getValue("pictureWidth", 360);
+  pictureHeight = settings.getValue("pictureHeight", 360);
+  outputDirectory = ofDirectory(settings.getValue("outputDirectoryPath", "./output"));
+  archiveDirectory = ofDirectory(settings.getValue("archiveDirectoryPathPath", "./archive"));
+  privateKeyPath = settings.setValue("privateKeyPath", "./id_rsa");
+  resultFrames = settings.setValue("resultFrames", 8);
+  previewFps = settings.getValue("previewFps", 2);
+  keyColor = ofColor::fromHex(settings.getValue("keyColor", 0xffd1cd));
 
   if (!archiveDirectory.exists())
   {
@@ -138,77 +138,77 @@ void ofApp::keyPressed(int key)
   ofLogNotice() << "keyPressed(): " << ofToString(key);
   switch (key)
   {
-    case 'l':
-      loadPhoto();
-      break;
-    case 'g':
-      generateGif();
-      break;
-    case OF_KEY_RETURN:
-      generateGif();
-      break;
-    case '/':
-      printQr();
-      break;
-    case '1':
-      selectGaraUpper(0);
-      break;
-    case '2':
-      selectGaraUpper(1);
-      break;
-    case '3':
-      selectGaraUpper(2);
-      break;
-    case '4':
-      selectGaraUpper(3);
-      break;
-    case '5':
-      selectGaraUpper(4);
-      break;
-    case '6':
-      selectGaraUpper(5);
-      break;
-    case '7':
-      selectGaraUpper(6);
-      break;
-    case '8':
-      selectGaraUpper(7);
-      break;
-    case '9':
-      selectGaraUpper(8);
-      break;
-    case 'q':
-      selectGaraLower(0);
-      break;
-    case 'w':
-      selectGaraLower(1);
-      break;
-    case 'e':
-      selectGaraLower(2);
-      break;
-    case 'r':
-      selectGaraLower(3);
-      break;
-    case 't':
-      selectGaraLower(4);
-      break;
-    case 'y':
-      selectGaraLower(5);
-      break;
-    case 'u':
-      selectGaraLower(6);
-      break;
-    case 'i':
-      selectGaraLower(7);
-      break;
-    case 'o':
-      selectGaraLower(8);
-      break;
-    case 'p':
-      selectGaraLower(9);
-      break;
-    default:
-      break;
+  case 'l':
+    loadPhoto();
+    break;
+  case 'g':
+    generateGif();
+    break;
+  case OF_KEY_RETURN:
+    generateGif();
+    break;
+  case '/':
+    printQr();
+    break;
+  case '1':
+    selectGaraUpper(0);
+    break;
+  case '2':
+    selectGaraUpper(1);
+    break;
+  case '3':
+    selectGaraUpper(2);
+    break;
+  case '4':
+    selectGaraUpper(3);
+    break;
+  case '5':
+    selectGaraUpper(4);
+    break;
+  case '6':
+    selectGaraUpper(5);
+    break;
+  case '7':
+    selectGaraUpper(6);
+    break;
+  case '8':
+    selectGaraUpper(7);
+    break;
+  case '9':
+    selectGaraUpper(8);
+    break;
+  case 'q':
+    selectGaraLower(0);
+    break;
+  case 'w':
+    selectGaraLower(1);
+    break;
+  case 'e':
+    selectGaraLower(2);
+    break;
+  case 'r':
+    selectGaraLower(3);
+    break;
+  case 't':
+    selectGaraLower(4);
+    break;
+  case 'y':
+    selectGaraLower(5);
+    break;
+  case 'u':
+    selectGaraLower(6);
+    break;
+  case 'i':
+    selectGaraLower(7);
+    break;
+  case 'o':
+    selectGaraLower(8);
+    break;
+  case 'p':
+    selectGaraLower(9);
+    break;
+  default:
+    break;
   }
 }
 
@@ -310,9 +310,9 @@ void ofApp::loadGara()
   garaUpperDirectory.sort();
   for (int i = 0; i < garaUpperKinds; i++)
   {
-    ofDirectory      d       = ofDirectory(garaUpperDirectory.getPath(i));
-    int              garaNum = d.listDir();
-    vector <ofImage> v(garaNum);
+    ofDirectory d = ofDirectory(garaUpperDirectory.getPath(i));
+    int garaNum = d.listDir();
+    vector<ofImage> v(garaNum);
     for (int j = 0; j < garaNum; j++)
     {
       string path = d.getPath(j);
@@ -327,9 +327,9 @@ void ofApp::loadGara()
   garaLowerDirectory.sort();
   for (int i = 0; i < garaLowerKinds; i++)
   {
-    ofDirectory      d       = ofDirectory(garaLowerDirectory.getPath(i));
-    int              garaNum = d.listDir();
-    vector <ofImage> v(garaNum);
+    ofDirectory d = ofDirectory(garaLowerDirectory.getPath(i));
+    int garaNum = d.listDir();
+    vector<ofImage> v(garaNum);
     for (int j = 0; j < garaNum; j++)
     {
       string path = d.getPath(j);
@@ -364,7 +364,7 @@ void ofApp::loadPhoto()
   {
     pictureImage = ofImage(loadFileResult.getPath());
     pictureImage.resize(pictureRectangle.width, pictureRectangle.height);
-    isPhotoLoaded         = true;
+    isPhotoLoaded = true;
     isBackgroundGenerated = false;
   }
 }
@@ -375,7 +375,7 @@ void ofApp::generateGif()
 
   ofSystem("cp -f " + outputPath + "/* " + archivePath + "/"); // Archive
 
-  isGenerating      = true;
+  isGenerating = true;
   generateTimestamp = ofGetTimestampString("%d%H%M%s");
   fbo.readToPixels(pixels);
   generatingImage.setFromPixels(pixels);
@@ -393,7 +393,7 @@ void ofApp::generateGif()
     {
       printQr();
     }
-    isGenerating    = false;
+    isGenerating = false;
     generatingCount = 0;
 
     setStatusMessage("Generate completed.");
@@ -411,7 +411,7 @@ bool ofApp::uploadGif()
 void ofApp::printQr()
 {
   ofApp::setStatusMessage("Print process has been started.");
-  ofSystem("/usr/local/bin/qrencode -o " + outputPath + "/qr.png -m 2 'http://" + serverUrl + "/index.php/?id=" + generateTimestamp + "'");
+  ofSystem("/usr/local/bin/qrencode -lH -m 1 -o " + outputPath + "/qr.png 'http://" + serverUrl + "/index.php/?id=" + generateTimestamp + "'");
   ofSystem("lpr -o media=DC20 -o PageSize=DC20 -o fitplot " + outputPath + "/qr.png");
 }
 
@@ -463,4 +463,3 @@ void ofApp::say(string s)
 {
   sysCommand.callCommand("say -v Alex " + s);
 }
-
