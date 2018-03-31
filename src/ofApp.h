@@ -3,12 +3,15 @@
 #include "ofMain.h"
 #include "ofxDatGui.h"
 #include "ofxDatGuiCustomFontSize.h"
+#include "ofxXmlSettings.h"
 #include "SysCommand.h"
 
-class ofApp : public ofBaseApp {
+class ofApp : public ofBaseApp
+{
 public:
-  const string SERVER_URL = "photo.moisturesurge72.jp";
   const int GUI_MIN_WIDTH = 360;
+
+  ofxXmlSettings settings;
 
   void      setup();
   void      update();
@@ -17,7 +20,6 @@ public:
   void      keyPressed(int key);
   void      keyReleased(int key);
   void      windowResized(int w, int h);
-  void      dragEvent(ofDragInfo dragInfo);
   void      gotMessage(ofMessage msg);
   void      exit();
 
@@ -40,8 +42,12 @@ public:
 
   ofRectangle windowRectangle;
   ofRectangle gifRectangle;
+  int         gifWidth;
+  int         gifHeight;
   ofRectangle previewRectangle;
   ofRectangle pictureRectangle;
+  int         pictureWidth;
+  int         pictureHeight;
 
   bool   isPhotoLoaded         = false;
   bool   isBackgroundGenerated = false;
@@ -49,7 +55,6 @@ public:
   bool   isHamonLoaded         = false;
   bool   isGenerating          = false;
   int    generatingCount       = 0;
-  int    resultFrames          = 8;
   string generateTimestamp     = "";
 
   ofxDatGui            *gui;
@@ -62,36 +67,35 @@ public:
   ofxDatGuiSlider      *previewFpsSlider;
   ofxDatGuiTextInput   *statusTextInput;
 
-  ofDirectory                garaUpperDirectory = ofDirectory(ofToDataPath("./materials/gara/upper"));
-  ofDirectory                garaLowerDirectory = ofDirectory(ofToDataPath("./materials/gara/lower"));
+  string                     settingsXmlPath = ofFilePath::getUserHomeDir() + "/Desktop/settings.xml";
+  ofDirectory                logDirectory    = ofDirectory(ofFilePath::getUserHomeDir() + "/Desktop/log");
+  string                     serverUrl;
+  ofDirectory                garaUpperDirectory;
+  ofDirectory                garaLowerDirectory;
   vector <vector <ofImage> > garaUpperVector;
   vector <vector <ofImage> > garaLowerVector;
   int                        garaUpperKinds;
   int                        garaLowerKinds;
   int                        garaUpperCurrentKind = 0;
   int                        garaLowerCurrentKind = 0;
-  ofDirectory                hamonDirectory       = ofDirectory(ofToDataPath("./materials/hamon"));
+  ofDirectory                hamonDirectory;
   vector <ofImage>           hamonImages;
   int                        hamonNum;
-  ofImage                    mojiImage       = ofImage("./materials/moji.png");
-  ofDirectory                logDirectory    = ofDirectory("./log");
-  ofDirectory                outputDirectory = ofDirectory("./output");
+  ofImage                    mojiImage;
+  ofDirectory                outputDirectory;
   string                     outputPath;
-  ofDirectory                archiveDirectory = ofDirectory("./archive");
+  ofDirectory                archiveDirectory;
   string                     archivePath;
-  string                     privateKeyPath = "./id_rsa";
+  string                     privateKeyPath;
 
-  int            previewFps = 2;
+  int            previewFps;
+  int            resultFrames;
   ofFbo          fbo;
   unsigned char *picturePixel;
   ofImage        pictureImage;
-  ofColor        keyColor = ofColor::fromHex(0xffd1cd);
+  ofColor        keyColor;
   ofVboMesh      backgroundMesh;
   ofPixels       pixels;
   ofImage        generatingImage;
 };
-
-
-
-
 
