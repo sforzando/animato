@@ -64,7 +64,9 @@ public:
   ofxDatGuiMatrix      *garaLowerMatrix;
   ofxDatGuiButton      *generateButton;
   ofxDatGuiToggle      *printToggle;
-  ofxDatGuiColorPicker *colorPicker;
+  ofxDatGuiColorPicker *keyColorPicker;
+  ofxDatGuiColorPicker *averageColorPicker;
+  ofxDatGuiToggle      *averageToggle;
   ofxDatGuiSlider      *previewFpsSlider;
   ofxDatGuiTextInput   *statusTextInput;
 
@@ -95,6 +97,7 @@ public:
   unsigned char *picturePixel;
   ofImage        pictureImage;
   ofColor        keyColor;
+  ofColor        averageColor;
   ofVboMesh      backgroundMesh;
   ofPixels       pixels;
   ofImage        generatingImage;
