@@ -72,13 +72,27 @@ void ofApp::setup()
   });
   printToggle = gui->addToggle("  - with QR");
   printToggle->setChecked(true);
-  colorPicker = gui->addColorPicker("Key Color");
-  colorPicker->setColor(keyColor);
-  colorPicker->onColorPickerEvent([&](ofxDatGuiColorPickerEvent e) {
-    ofLog(OF_LOG_NOTICE, "onColorPicker()");
+  keyColorPicker = gui->addColorPicker("Key Color");
+  keyColorPicker->setColor(keyColor);
+  keyColorPicker->onColorPickerEvent([&](ofxDatGuiColorPickerEvent e) {
+    ofLog(OF_LOG_NOTICE, "onKeyColorPicker()");
     keyColor = e.color;
     isBackgroundGenerated = false;
-    ofApp::setStatusMessage("The Key Color has been changed.");
+    ofApp::setStatusMessage("Key Color has been changed.");
+  });
+  averageColorPicker = gui->addColorPicker("Average Color");
+  averageColorPicker->setColor(keyColor);
+  averageColorPicker->onColorPickerEvent([&](ofxDatGuiColorPickerEvent e) {
+    ofLog(OF_LOG_NOTICE, "onAverageColorPicker()");
+    averageColor = e.color;
+    isBackgroundGenerated = false;
+    ofApp::setStatusMessage("Average Color has been changed.");
+  });
+  averageToggle = gui->addToggle("  - use Average Color");
+  averageToggle->setChecked(true);
+  averageToggle->onToggleEvent([&](ofxDatGuiToggleEvent e){
+    ofLog(OF_LOG_NOTICE, "onAverageToggle()");
+    isBackgroundGenerated = false;
   });
   previewFpsSlider = gui->addSlider("Preview FPS", 1.0, 60.0, previewFps);
   previewFpsSlider->bind(previewFps);
@@ -261,6 +275,11 @@ ofVboMesh ofApp::getBackground_STRIP()
 {
   if (!isBackgroundGenerated)
   {
+    ofColor refColor = keyColor;
+    if(averageToggle->getChecked()) {
+      refColor = averageColor;
+    }
+
     backgroundMesh.clear();
 
     backgroundMesh.setMode(OF_PRIMITIVE_TRIANGLE_STRIP);
@@ -268,28 +287,28 @@ ofVboMesh ofApp::getBackground_STRIP()
     // LEFT
     for (int h = 0; h < pictureHeight; h++) {
       backgroundMesh.addVertex(ofPoint(0, gifHeight - (h * (gifHeight / pictureHeight)), 0));
-      backgroundMesh.addColor(keyColor);
+      backgroundMesh.addColor(refColor);
       backgroundMesh.addVertex(ofPoint(gifWidth - pictureWidth, gifHeight - h, 0));
       backgroundMesh.addColor(pictureImage.getColor(0, pictureHeight - h - 1));
       backgroundMesh.addVertex(ofPoint(gifWidth - pictureWidth, gifHeight - h - 1, 0));
       backgroundMesh.addColor(pictureImage.getColor(0, max(0, pictureHeight - h - 2)));
       backgroundMesh.addVertex(ofPoint(0, gifHeight - (h * (gifHeight / pictureHeight)), 0));
-      backgroundMesh.addColor(keyColor);
+      backgroundMesh.addColor(refColor);
     }
 
     // TOP
     for (int w = 0; w < pictureWidth; w++) {
       backgroundMesh.addVertex(ofPoint(w * (gifWidth / pictureWidth), 0, 0));
-      backgroundMesh.addColor(keyColor);
+      backgroundMesh.addColor(refColor);
       backgroundMesh.addVertex(ofPoint(gifWidth - pictureWidth + w, gifHeight - pictureHeight, 0));
       backgroundMesh.addColor(pictureImage.getColor(w, 0));
       backgroundMesh.addVertex(ofPoint(gifWidth - pictureWidth + w + 1, gifHeight - pictureHeight, 0));
       backgroundMesh.addColor(pictureImage.getColor(min(pictureWidth - 1, w + 1), 0));
       backgroundMesh.addVertex(ofPoint(w * (gifWidth / pictureWidth), 0, 0));
-      backgroundMesh.addColor(keyColor);
+      backgroundMesh.addColor(refColor);
     }
     backgroundMesh.addVertex(ofPoint(gifWidth, 0, 0));
-    backgroundMesh.addColor(keyColor);
+    backgroundMesh.addColor(refColor);
     backgroundMesh.addVertex(ofPoint(gifWidth, gifHeight, 0));
     backgroundMesh.addColor(pictureImage.getColor(pictureWidth - 1, 0));
 
@@ -303,39 +322,39 @@ ofVboMesh ofApp::getBackground_FAN()
 {
   if (!isBackgroundGenerated)
   {
+    ofColor refColor = keyColor;
+    if(averageToggle->getChecked()) {
+      refColor = averageColor;
+    }
+    
     backgroundMesh.clear();
     backgroundMesh.setMode(OF_PRIMITIVE_TRIANGLE_FAN);
 
     // origin: TOP-LEFT
     backgroundMesh.addVertex(ofPoint(0, 0, 0));
-    backgroundMesh.addColor(keyColor);
+    backgroundMesh.addColor(refColor);
 
     // BOTTOM-LEFT
-    backgroundMesh.addVertex(ofPoint(0, gifRectangle.height, 0));
-    backgroundMesh.addColor(keyColor);
+    backgroundMesh.addVertex(ofPoint(0, gifHeight, 0));
+    backgroundMesh.addColor(refColor);
 
     // PICTURE-LEFT
-    for (int y = 0; y < pictureRectangle.height; y++)
+    for (int y = 0; y < pictureHeight; y++)
     {
-      backgroundMesh.addVertex(ofPoint(gifRectangle.width - pictureRectangle.width, gifRectangle.height - y, 0));
-      backgroundMesh.addColor(pictureImage.getColor(0, (pictureRectangle.height - 1) - y));
-      if (y == 0)
-      {
-        ofLog() << pictureImage.getColor(0, pictureRectangle.height - y);
-        ofLog() << pictureImage.getHeight();
-      }
+      backgroundMesh.addVertex(ofPoint(gifWidth - pictureWidth, gifHeight - y, 0));
+      backgroundMesh.addColor(pictureImage.getColor(0, (pictureHeight - 1) - y));
     }
 
     // PICTURE-TOP
     for (int x = 0; x <= pictureRectangle.width; x++)
     {
-      backgroundMesh.addVertex(ofPoint(gifRectangle.width - pictureRectangle.width + x, gifRectangle.height - pictureRectangle.height, 0));
+      backgroundMesh.addVertex(ofPoint(gifWidth - pictureWidth + x, gifHeight - pictureHeight, 0));
       backgroundMesh.addColor(pictureImage.getColor(x, 0));
     }
 
     // TOP-RIGHT
-    backgroundMesh.addVertex(ofPoint(gifRectangle.width, 0, 0));
-    backgroundMesh.addColor(keyColor);
+    backgroundMesh.addVertex(ofPoint(gifWidth, 0, 0));
+    backgroundMesh.addColor(refColor);
     isBackgroundGenerated = true;
   }
 
@@ -405,6 +424,27 @@ void ofApp::loadPhoto()
   {
     pictureImage = ofImage(loadFileResult.getPath());
     pictureImage.resize(pictureRectangle.width, pictureRectangle.height);
+    
+    // Calculate Average Color
+    float r = 0, g = 0, b = 0;
+    for (int w = 0; w < pictureWidth; w++) {
+      ofColor edgeColor = pictureImage.getColor(w, 0);
+      r += edgeColor.r;
+      g += edgeColor.g;
+      b += edgeColor.b;
+    }
+    for (int h = 0; h < pictureHeight; h++) {
+      ofColor edgeColor = pictureImage.getColor(0, h);
+      r += edgeColor.r;
+      g += edgeColor.g;
+      b += edgeColor.b;
+    }
+    r /= pictureWidth + pictureHeight;
+    g /= pictureWidth + pictureHeight;
+    b /= pictureWidth + pictureHeight;
+    averageColor.set(r, g, b);
+    averageColorPicker->setColor(averageColor);
+
     isPhotoLoaded         = true;
     isBackgroundGenerated = false;
     setStatusMessage("Loading photo completed.");
