@@ -15,8 +15,8 @@ void ofApp::setup()
   pictureHeight      = settings.getValue("pictureHeight", 360);
   outputDirectory    = ofDirectory(settings.getValue("outputDirectoryPath", "./output"));
   archiveDirectory   = ofDirectory(settings.getValue("archiveDirectoryPathPath", "./archive"));
-  privateKeyPath     = settings.setValue("privateKeyPath", "./id_rsa");
-  resultFrames       = settings.setValue("resultFrames", 8);
+  privateKeyPath     = settings.getValue("privateKeyPath", "./id_rsa");
+  resultFrames       = settings.getValue("resultFrames", 8);
   previewFps         = settings.getValue("previewFps", 2);
   keyColor           = ofColor::fromHex(settings.getValue("keyColor", 0xffd1cd));
 
@@ -263,38 +263,72 @@ ofVboMesh ofApp::getBackground()
   {
     backgroundMesh.clear();
 
-    backgroundMesh.setMode(OF_PRIMITIVE_TRIANGLE_FAN);
+    backgroundMesh.setMode(OF_PRIMITIVE_TRIANGLE_STRIP);
 
-    // origin: TOP-LEFT
+    // LEFT
+    for (int h = 0; h < pictureHeight; h++) {
+      backgroundMesh.addVertex(ofPoint(0, gifHeight - (h * (gifHeight / pictureHeight)), 0));
+      backgroundMesh.addColor(keyColor);
+      backgroundMesh.addVertex(ofPoint(gifWidth - pictureWidth, gifHeight - h, 0));
+      backgroundMesh.addColor(pictureImage.getColor(0, pictureHeight - h - 1));
+      backgroundMesh.addVertex(ofPoint(gifWidth - pictureWidth, gifHeight - h - 1, 0));
+      backgroundMesh.addColor(pictureImage.getColor(0, pictureHeight - h - 2));
+      backgroundMesh.addVertex(ofPoint(0, gifHeight - (h * (gifHeight / pictureHeight)), 0));
+      backgroundMesh.addColor(keyColor);
+    }
     backgroundMesh.addVertex(ofPoint(0, 0, 0));
     backgroundMesh.addColor(keyColor);
+    backgroundMesh.addVertex(ofPoint(gifWidth, gifHeight, 0));
+    backgroundMesh.addColor(pictureImage.getColor(0, 0));
 
-    // BOTTOM-LEFT
-    backgroundMesh.addVertex(ofPoint(0, gifRectangle.height, 0));
-    backgroundMesh.addColor(keyColor);
-
-    // PICTURE-LEFT
-    for (int y = 0; y < pictureRectangle.height; y++)
-    {
-      backgroundMesh.addVertex(ofPoint(gifRectangle.width - pictureRectangle.width, gifRectangle.height - y, 0));
-      backgroundMesh.addColor(pictureImage.getColor(0, (pictureRectangle.height - 1) - y));
-      if (y == 0)
-      {
-        ofLog() << pictureImage.getColor(0, pictureRectangle.height - y);
-        ofLog() << pictureImage.getHeight();
-      }
+    // TOP
+    for (int w = 0; w < pictureWidth; w++) {
+      backgroundMesh.addVertex(ofPoint(w * (gifWidth / pictureWidth), 0, 0));
+      backgroundMesh.addColor(keyColor);
+      backgroundMesh.addVertex(ofPoint(gifWidth - pictureWidth + w, gifHeight - pictureHeight, 0));
+      backgroundMesh.addColor(pictureImage.getColor(w, 0));
+      backgroundMesh.addVertex(ofPoint(gifWidth - pictureWidth + w + 1, gifHeight - pictureHeight, 0));
+      backgroundMesh.addColor(pictureImage.getColor(w + 1, 0));
+      backgroundMesh.addVertex(ofPoint(w * (gifWidth / pictureWidth), 0, 0));
+      backgroundMesh.addColor(keyColor);
     }
-
-    // PICTURE-TOP
-    for (int x = 0; x <= pictureRectangle.width; x++)
-    {
-      backgroundMesh.addVertex(ofPoint(gifRectangle.width - pictureRectangle.width + x, gifRectangle.height - pictureRectangle.height, 0));
-      backgroundMesh.addColor(pictureImage.getColor(x, 0));
-    }
-
-    // TOP-RIGHT
-    backgroundMesh.addVertex(ofPoint(gifRectangle.width, 0, 0));
+    backgroundMesh.addVertex(ofPoint(gifWidth, 0, 0));
     backgroundMesh.addColor(keyColor);
+    backgroundMesh.addVertex(ofPoint(gifWidth, gifHeight, 0));
+    backgroundMesh.addColor(pictureImage.getColor(pictureWidth - 1, 0));
+
+    //    backgroundMesh.setMode(OF_PRIMITIVE_TRIANGLE_FAN);
+    //
+    //    // origin: TOP-LEFT
+    //    backgroundMesh.addVertex(ofPoint(0, 0, 0));
+    //    backgroundMesh.addColor(keyColor);
+    //
+    //    // BOTTOM-LEFT
+    //    backgroundMesh.addVertex(ofPoint(0, gifRectangle.height, 0));
+    //    backgroundMesh.addColor(keyColor);
+    //
+    //    // PICTURE-LEFT
+    //    for (int y = 0; y < pictureRectangle.height; y++)
+    //    {
+    //      backgroundMesh.addVertex(ofPoint(gifRectangle.width - pictureRectangle.width, gifRectangle.height - y, 0));
+    //      backgroundMesh.addColor(pictureImage.getColor(0, (pictureRectangle.height - 1) - y));
+    //      if (y == 0)
+    //      {
+    //        ofLog() << pictureImage.getColor(0, pictureRectangle.height - y);
+    //        ofLog() << pictureImage.getHeight();
+    //      }
+    //    }
+    //
+    //    // PICTURE-TOP
+    //    for (int x = 0; x <= pictureRectangle.width; x++)
+    //    {
+    //      backgroundMesh.addVertex(ofPoint(gifRectangle.width - pictureRectangle.width + x, gifRectangle.height - pictureRectangle.height, 0));
+    //      backgroundMesh.addColor(pictureImage.getColor(x, 0));
+    //    }
+    //
+    //    // TOP-RIGHT
+    //    backgroundMesh.addVertex(ofPoint(gifRectangle.width, 0, 0));
+    //    backgroundMesh.addColor(keyColor);
 
     isBackgroundGenerated = true;
   }
@@ -378,11 +412,11 @@ void ofApp::generateGif()
 
   isGenerating      = true;
   generateTimestamp = ofGetTimestampString("%d%H%M%s");
-  fbo.readToPixels(pixels);
-  generatingImage.setFromPixels(pixels);
-  generatingImage.save(outputPath + "/" + ofToString(generatingCount, 2, '0') + ".png");
   if (generatingCount < resultFrames)
   {
+    fbo.readToPixels(pixels);
+    generatingImage.setFromPixels(pixels);
+    generatingImage.save(outputPath + "/" + ofToString(generatingCount, 2, '0') + ".png");
     generatingCount++;
   }
   else
@@ -404,6 +438,8 @@ void ofApp::generateGif()
 bool ofApp::uploadGif()
 {
   ofApp::setStatusMessage("Upload process has been started.");
+  string command = "scp -i " + ofFile(privateKeyPath).getAbsolutePath() + " " + outputPath + "/*.gif " + "clinique@" + serverUrl + ":/var/www/html/gif/";
+  cout << command;
   ofSystem("scp -i " + ofFile(privateKeyPath).getAbsolutePath() + " " + outputPath + "/*.gif " + "clinique@" + serverUrl + ":/var/www/html/gif/");
 
   return true;
