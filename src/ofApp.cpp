@@ -446,7 +446,30 @@ void ofApp::loadHamon()
   setStatusMessage("Loading of moisture patterns completed.");
 }
 
-void ofApp::loadPhoto(){}
+void ofApp::loadPhoto()
+{
+  ofLog(OF_LOG_NOTICE, "loadPhoto()");
+
+  watchDirectory.listDir();
+  watchDirectory.sort();
+  for (vector <ofFile>::const_reverse_iterator it = watchDirectory.rbegin(); it != watchDirectory.rend(); it++) {
+    ofLog(OF_LOG_VERBOSE, (*it).getAbsolutePath());
+    string ext = (*it).getExtension();
+    if (ext == "png" || ext == "PNG" || ext == "jpg" || ext == "JPG") {
+      pictureImage = ofImage((*it).getAbsolutePath());
+      pictureImage.resize(pictureRectangle.width, pictureRectangle.height);
+      
+      isPhotoLoaded         = true;
+      isBackgroundGenerated = false;
+      number++;
+      numberTextInput->setText(ofToString(number, 3, '0'));
+      
+      setStatusMessage("Loading photo completed.");
+      return;
+    }
+  }
+  setStatusMessage("404 NOT FOUND!!");
+}
 
 void ofApp::selectPhoto()
 {
