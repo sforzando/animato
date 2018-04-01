@@ -6,7 +6,7 @@ void ofApp::setup()
   settings.loadFile(settingsXmlPath);
   serverUrl          = settings.getValue("serverUrl", "photo.moisturesurge72.jp");
   prefix             = settings.getValue("prefix", "L");
-  number             = settings.getValue("number", 1);
+  number             = settings.getValue("number", 0);
   garaUpperDirectory = ofDirectory(settings.getValue("garaUpperDirectoryPath", "./materials/gara/upper"));
   garaLowerDirectory = ofDirectory(settings.getValue("garaLowerDirectoryPath", "./materials/gara/lower"));
   hamonDirectory     = ofDirectory(settings.getValue("hamonDirectoryPath", "./materials/hamon"));
@@ -465,6 +465,9 @@ void ofApp::loadPhoto()
 
     isPhotoLoaded         = true;
     isBackgroundGenerated = false;
+    number++;
+    numberTextInput->setText(ofToString(number, 3, '0'));
+
     setStatusMessage("Loading photo completed.");
   }
 }
@@ -498,8 +501,6 @@ void ofApp::generateGif()
     }
     isGenerating    = false;
     generatingCount = 0;
-    number++;
-    numberTextInput->setText(ofToString(number, 3, '0'));
 
     setStatusMessage("Generate process completed.");
   }
