@@ -10,17 +10,20 @@ void ofApp::setup()
   garaUpperDirectory = ofDirectory(settings.getValue("garaUpperDirectoryPath", "./materials/gara/upper"));
   garaLowerDirectory = ofDirectory(settings.getValue("garaLowerDirectoryPath", "./materials/gara/lower"));
   hamonDirectory     = ofDirectory(settings.getValue("hamonDirectoryPath", "./materials/hamon"));
-  mojiImage          = ofImage(settings.getValue("mojiImagePath", "./materials/moji.png"));
-  gifWidth           = settings.getValue("gifWidth", 1080);
-  gifHeight          = settings.getValue("gifHeight", 1080);
-  pictureWidth       = settings.getValue("pictureWidth", 360);
-  pictureHeight      = settings.getValue("pictureHeight", 360);
-  outputDirectory    = ofDirectory(settings.getValue("outputDirectoryPath", "./output"));
-  archiveDirectory   = ofDirectory(settings.getValue("archiveDirectoryPathPath", "./archive"));
-  privateKeyPath     = settings.getValue("privateKeyPath", "./id_rsa");
-  resultFrames       = settings.getValue("resultFrames", 8);
-  previewFps         = settings.getValue("previewFps", 2);
-  keyColor           = ofColor::fromHex(settings.getValue("keyColor", 0xffd1cd));
+  string watchDirectoryPath = settings.getValue("watchDirectory", "~/Pictures");
+  ofStringReplace(watchDirectoryPath, "~", ofFilePath::getUserHomeDir());
+  watchDirectory   = ofDirectory(watchDirectoryPath);
+  mojiImage        = ofImage(settings.getValue("mojiImagePath", "./materials/moji.png"));
+  gifWidth         = settings.getValue("gifWidth", 1080);
+  gifHeight        = settings.getValue("gifHeight", 1080);
+  pictureWidth     = settings.getValue("pictureWidth", 360);
+  pictureHeight    = settings.getValue("pictureHeight", 360);
+  outputDirectory  = ofDirectory(settings.getValue("outputDirectoryPath", "./output"));
+  archiveDirectory = ofDirectory(settings.getValue("archiveDirectoryPathPath", "./archive"));
+  privateKeyPath   = settings.getValue("privateKeyPath", "./id_rsa");
+  resultFrames     = settings.getValue("resultFrames", 8);
+  previewFps       = settings.getValue("previewFps", 2);
+  keyColor         = ofColor::fromHex(settings.getValue("keyColor", 0xffd1cd));
 
   if (!archiveDirectory.exists())
   {
@@ -53,7 +56,7 @@ void ofApp::setup()
   prefixTextInput = gui->addTextInput("Prefix");
   prefixTextInput->setInputType(ofxDatGuiInputType::ALPHA_NUMERIC);
   prefixTextInput->setText(prefix);
-  prefixTextInput->onTextInputEvent([&](ofxDatGuiTextInputEvent e){
+  prefixTextInput->onTextInputEvent([&](ofxDatGuiTextInputEvent e) {
     ofLog(OF_LOG_NOTICE, "onPrefixTextInput()");
     prefix = prefixTextInput->getText();
   });
@@ -68,6 +71,11 @@ void ofApp::setup()
   loadButton->onButtonEvent([&](ofxDatGuiButtonEvent e) {
     ofLog(OF_LOG_NOTICE, "onLoadButton()");
     loadPhoto();
+  });
+  selectButton = gui->addButton("[S]elect");
+  selectButton->onButtonEvent([&](ofxDatGuiButtonEvent e) {
+    ofLog(OF_LOG_NOTICE, "onSelectButton()");
+    selectPhoto();
   });
   garaUpperMatrix = gui->addMatrix("Upper", garaUpperKinds);
   garaUpperMatrix->setRadioMode(true);
@@ -169,6 +177,9 @@ void ofApp::keyPressed(int key)
   {
     case 'l':
       loadPhoto();
+      break;
+    case 's':
+      selectPhoto();
       break;
     case 'g':
       generateGif();
@@ -275,6 +286,7 @@ void ofApp::exit()
   settings.setValue("garaUpperDirectoryPath", "./materials/gara/upper");
   settings.setValue("garaLowerDirectoryPath", "./materials/gara/lower");
   settings.setValue("hamonDirectoryPath", "./materials/hamon");
+  settings.setValue("watchDirectory", "~/Pictures");
   settings.setValue("mojiImagePath", "./materials/moji.png");
   settings.setValue("gifWidth", gifWidth);
   settings.setValue("gifHeight", gifHeight);
@@ -437,31 +449,42 @@ void ofApp::loadHamon()
 void ofApp::loadPhoto()
 {
   ofLog(OF_LOG_NOTICE, "loadPhoto()");
+
+  watchDirectory.listDir();
+  watchDirectory.sort();
+  for (vector <ofFile>::const_reverse_iterator it = watchDirectory.rbegin(); it != watchDirectory.rend(); it++) {
+    ofLog(OF_LOG_VERBOSE, (*it).getAbsolutePath());
+    string ext = (*it).getExtension();
+    if (ext == "png" || ext == "PNG" || ext == "jpg" || ext == "JPG") {
+      pictureImage = ofImage((*it).getAbsolutePath());
+      pictureImage.resize(pictureRectangle.width, pictureRectangle.height);
+
+      calculateAverageColor();
+
+      isPhotoLoaded         = true;
+      isBackgroundGenerated = false;
+      number++;
+      numberTextInput->setText(ofToString(number, 3, '0'));
+
+      setStatusMessage("Loading photo completed.");
+
+      return;
+    }
+  }
+  setStatusMessage("404 NOT FOUND!!");
+}
+
+void ofApp::selectPhoto()
+{
+  ofLog(OF_LOG_NOTICE, "loadPhoto()");
+
   ofFileDialogResult loadFileResult = ofSystemLoadDialog("Choose a photo");
   if (loadFileResult.bSuccess)
   {
     pictureImage = ofImage(loadFileResult.getPath());
     pictureImage.resize(pictureRectangle.width, pictureRectangle.height);
 
-    // Calculate Average Color
-    float r = 0, g = 0, b = 0;
-    for (int w = 0; w < pictureWidth; w++) {
-      ofColor edgeColor = pictureImage.getColor(w, 0);
-      r += edgeColor.r;
-      g += edgeColor.g;
-      b += edgeColor.b;
-    }
-    for (int h = 0; h < pictureHeight; h++) {
-      ofColor edgeColor = pictureImage.getColor(0, h);
-      r += edgeColor.r;
-      g += edgeColor.g;
-      b += edgeColor.b;
-    }
-    r /= pictureWidth + pictureHeight;
-    g /= pictureWidth + pictureHeight;
-    b /= pictureWidth + pictureHeight;
-    averageColor.set(r, g, b);
-    averageColorPicker->setColor(averageColor);
+    calculateAverageColor();
 
     isPhotoLoaded         = true;
     isBackgroundGenerated = false;
@@ -472,6 +495,28 @@ void ofApp::loadPhoto()
   }
 }
 
+void ofApp::calculateAverageColor()
+{
+  float r = 0, g = 0, b = 0;
+  for (int w = 0; w < pictureWidth; w++) {
+    ofColor edgeColor = pictureImage.getColor(w, 0);
+    r += edgeColor.r;
+    g += edgeColor.g;
+    b += edgeColor.b;
+  }
+  for (int h = 0; h < pictureHeight; h++) {
+    ofColor edgeColor = pictureImage.getColor(0, h);
+    r += edgeColor.r;
+    g += edgeColor.g;
+    b += edgeColor.b;
+  }
+  r /= pictureWidth + pictureHeight;
+  g /= pictureWidth + pictureHeight;
+  b /= pictureWidth + pictureHeight;
+  averageColor.set(r, g, b);
+  averageColorPicker->setColor(averageColor);
+}
+
 void ofApp::generateGif()
 {
   isGenerating = true;
@@ -480,7 +525,7 @@ void ofApp::generateGif()
     setStatusMessage("Generate process has been started.");
     ofSystem("cp -f " + outputPath + "/* " + archivePath + "/"); // Archive
     generateTimestamp = ofGetTimestampString("%d%H%M%s");
-    generateFilename = prefix + ofToString(number, 3, '0') + "_" + generateTimestamp;
+    generateFilename  = prefix + ofToString(number, 3, '0') + "_" + generateTimestamp;
   }
 
   if (generatingCount < resultFrames)
