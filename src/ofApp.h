@@ -30,8 +30,8 @@ public:
   void      loadPhoto();
   void      selectPhoto();
   void      calculateAverageColor();
-  void      generateGif();
-  bool      uploadGif();
+  void      generateMp4();
+  bool      uploadMp4();
   void      printQr();
 
   void      selectGaraUpper(int kind);

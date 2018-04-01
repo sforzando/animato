@@ -92,7 +92,7 @@ void ofApp::setup()
   generateButton = gui->addButton("[G]enerate");
   generateButton->onButtonEvent([&](ofxDatGuiButtonEvent e) {
     ofLog(OF_LOG_NOTICE, "onGenerateBUtton()");
-    ofApp::generateGif();
+    ofApp::generateMp4();
   });
   printToggle = gui->addToggle("  - with QR");
   printToggle->setChecked(true);
@@ -166,7 +166,7 @@ void ofApp::draw()
   fbo.draw(0, 0, previewRectangle.width, previewRectangle.height);
   if (isGenerating)
   {
-    generateGif();
+    generateMp4();
   }
 }
 
@@ -182,10 +182,10 @@ void ofApp::keyPressed(int key)
       selectPhoto();
       break;
     case 'g':
-      generateGif();
+      generateMp4();
       break;
     case OF_KEY_RETURN:
-      generateGif();
+      generateMp4();
       break;
     case '/':
       printQr();
@@ -517,13 +517,12 @@ void ofApp::calculateAverageColor()
   averageColorPicker->setColor(averageColor);
 }
 
-void ofApp::generateGif()
+void ofApp::generateMp4()
 {
   isGenerating = true;
 
   if (generatingCount == 0) {
     setStatusMessage("Generate process has been started.");
-    ofSystem("cp -f " + outputPath + "/* " + archivePath + "/"); // Archive
     generateTimestamp = ofGetTimestampString("%d%H%M%s");
     generateFilename  = prefix + ofToString(number, 3, '0') + "_" + generateTimestamp;
   }
@@ -537,24 +536,25 @@ void ofApp::generateGif()
   }
   else
   {
-    ofSystem("/usr/local/bin/ffmpeg -i " + outputPath + "/00.png -vf palettegen -y " + outputPath + "/palette.png"); // Make Palette
-    ofSystem("/usr/local/bin/ffmpeg -f image2 -r " + ofToString(previewFps) + " -i " + outputPath + "/%02d.png -i " + outputPath + "/palette.png -filter_complex paletteuse " + outputPath + "/" + generateFilename + ".gif");
+    ofSystem("/usr/local/bin/ffmpeg -framerate " + ofToString(previewFps) + " -i " + outputPath + "/%02d.png -vcodec libx264 -pix_fmt yuv420p -r " + ofToString(previewFps) + " " + outputPath + "/" + generateFilename + ".mp4");
 
-    if (uploadGif() && printToggle->getChecked())
+    if (uploadMp4() && printToggle->getChecked())
     {
       printQr();
     }
     isGenerating    = false;
     generatingCount = 0;
 
+    ofSystem("rsync " + outputPath + "/* " + archivePath + "/"); // Archive
+
     setStatusMessage("Generate process completed.");
   }
 }
 
-bool ofApp::uploadGif()
+bool ofApp::uploadMp4()
 {
   setStatusMessage("Upload process has been started.");
-  ofSystem("scp -i " + ofFile(privateKeyPath).getAbsolutePath() + " " + outputPath + "/*.gif " + "clinique@" + serverUrl + ":/var/www/html/gif/");
+  ofSystem("rsync -e 'ssh -i " + ofFile(privateKeyPath).getAbsolutePath() + "' " + outputPath + "/* " + "clinique@" + serverUrl + ":/var/www/html/");
   setStatusMessage("Upload process completed.");
 
   return true;
