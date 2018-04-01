@@ -57,8 +57,14 @@ public:
   bool   isGenerating          = false;
   int    generatingCount       = 0;
   string generateTimestamp     = "";
+  string generateFilename      = "";
+
+  string prefix = "";
+  int    number;
 
   ofxDatGui            *gui;
+  ofxDatGuiTextInput   *prefixTextInput;
+  ofxDatGuiTextInput   *numberTextInput;
   ofxDatGuiButton      *loadButton;
   ofxDatGuiMatrix      *garaUpperMatrix;
   ofxDatGuiMatrix      *garaLowerMatrix;

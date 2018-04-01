@@ -5,6 +5,8 @@ void ofApp::setup()
   // Load Settings
   settings.loadFile(settingsXmlPath);
   serverUrl          = settings.getValue("serverUrl", "photo.moisturesurge72.jp");
+  prefix             = settings.getValue("prefix", "L");
+  number             = settings.getValue("number", 0);
   garaUpperDirectory = ofDirectory(settings.getValue("garaUpperDirectoryPath", "./materials/gara/upper"));
   garaLowerDirectory = ofDirectory(settings.getValue("garaLowerDirectoryPath", "./materials/gara/lower"));
   hamonDirectory     = ofDirectory(settings.getValue("hamonDirectoryPath", "./materials/hamon"));
@@ -48,6 +50,20 @@ void ofApp::setup()
 
   gui = new ofxDatGui(ofxDatGuiAnchor::TOP_RIGHT);
   gui->setTheme(new ofxDatGuiCustomFontSize);
+  prefixTextInput = gui->addTextInput("Prefix");
+  prefixTextInput->setInputType(ofxDatGuiInputType::ALPHA_NUMERIC);
+  prefixTextInput->setText(prefix);
+  prefixTextInput->onTextInputEvent([&](ofxDatGuiTextInputEvent e){
+    ofLog(OF_LOG_NOTICE, "onPrefixTextInput()");
+    prefix = prefixTextInput->getText();
+  });
+  numberTextInput = gui->addTextInput("Number");
+  numberTextInput->setInputType(ofxDatGuiInputType::NUMERIC);
+  numberTextInput->onTextInputEvent([&](ofxDatGuiTextInputEvent e) {
+    ofLog(OF_LOG_NOTICE, "onNumberTextInput()");
+    number = ofToInt(numberTextInput->getText());
+  });
+  numberTextInput->setText(ofToString(number, 3, '0'));
   loadButton = gui->addButton("[L]oad");
   loadButton->onButtonEvent([&](ofxDatGuiButtonEvent e) {
     ofLog(OF_LOG_NOTICE, "onLoadButton()");
@@ -90,7 +106,7 @@ void ofApp::setup()
   });
   averageToggle = gui->addToggle("  - use Average Color");
   averageToggle->setChecked(true);
-  averageToggle->onToggleEvent([&](ofxDatGuiToggleEvent e){
+  averageToggle->onToggleEvent([&](ofxDatGuiToggleEvent e) {
     ofLog(OF_LOG_NOTICE, "onAverageToggle()");
     isBackgroundGenerated = false;
   });
@@ -254,6 +270,8 @@ void ofApp::exit()
 {
   // Save Settings
   settings.setValue("serverUrl", serverUrl);
+  settings.setValue("prefix", prefix);
+  settings.setValue("number", number);
   settings.setValue("garaUpperDirectoryPath", "./materials/gara/upper");
   settings.setValue("garaLowerDirectoryPath", "./materials/gara/lower");
   settings.setValue("hamonDirectoryPath", "./materials/hamon");
@@ -276,7 +294,7 @@ ofVboMesh ofApp::getBackground_STRIP()
   if (!isBackgroundGenerated)
   {
     ofColor refColor = keyColor;
-    if(averageToggle->getChecked()) {
+    if (averageToggle->getChecked()) {
       refColor = averageColor;
     }
 
@@ -323,10 +341,10 @@ ofVboMesh ofApp::getBackground_FAN()
   if (!isBackgroundGenerated)
   {
     ofColor refColor = keyColor;
-    if(averageToggle->getChecked()) {
+    if (averageToggle->getChecked()) {
       refColor = averageColor;
     }
-    
+
     backgroundMesh.clear();
     backgroundMesh.setMode(OF_PRIMITIVE_TRIANGLE_FAN);
 
@@ -424,7 +442,7 @@ void ofApp::loadPhoto()
   {
     pictureImage = ofImage(loadFileResult.getPath());
     pictureImage.resize(pictureRectangle.width, pictureRectangle.height);
-    
+
     // Calculate Average Color
     float r = 0, g = 0, b = 0;
     for (int w = 0; w < pictureWidth; w++) {
@@ -447,6 +465,9 @@ void ofApp::loadPhoto()
 
     isPhotoLoaded         = true;
     isBackgroundGenerated = false;
+    number++;
+    numberTextInput->setText(ofToString(number, 3, '0'));
+
     setStatusMessage("Loading photo completed.");
   }
 }
@@ -459,6 +480,7 @@ void ofApp::generateGif()
     setStatusMessage("Generate process has been started.");
     ofSystem("cp -f " + outputPath + "/* " + archivePath + "/"); // Archive
     generateTimestamp = ofGetTimestampString("%d%H%M%s");
+    generateFilename = prefix + ofToString(number, 3, '0') + "_" + generateTimestamp;
   }
 
   if (generatingCount < resultFrames)
@@ -471,7 +493,7 @@ void ofApp::generateGif()
   else
   {
     ofSystem("/usr/local/bin/ffmpeg -i " + outputPath + "/00.png -vf palettegen -y " + outputPath + "/palette.png"); // Make Palette
-    ofSystem("/usr/local/bin/ffmpeg -f image2 -r " + ofToString(previewFps) + " -i " + outputPath + "/%02d.png -i " + outputPath + "/palette.png -filter_complex paletteuse " + outputPath + "/" + generateTimestamp + ".gif");
+    ofSystem("/usr/local/bin/ffmpeg -f image2 -r " + ofToString(previewFps) + " -i " + outputPath + "/%02d.png -i " + outputPath + "/palette.png -filter_complex paletteuse " + outputPath + "/" + generateFilename + ".gif");
 
     if (uploadGif() && printToggle->getChecked())
     {
@@ -487,8 +509,6 @@ void ofApp::generateGif()
 bool ofApp::uploadGif()
 {
   setStatusMessage("Upload process has been started.");
-  string command = "scp -i " + ofFile(privateKeyPath).getAbsolutePath() + " " + outputPath + "/*.gif " + "clinique@" + serverUrl + ":/var/www/html/gif/";
-  cout << command;
   ofSystem("scp -i " + ofFile(privateKeyPath).getAbsolutePath() + " " + outputPath + "/*.gif " + "clinique@" + serverUrl + ":/var/www/html/gif/");
   setStatusMessage("Upload process completed.");
 
@@ -498,7 +518,7 @@ bool ofApp::uploadGif()
 void ofApp::printQr()
 {
   setStatusMessage("Print process has been started.");
-  ofSystem("/usr/local/bin/qrencode -lH -m 1 -o " + outputPath + "/qr.png 'http://" + serverUrl + "/index.php/?id=" + generateTimestamp + "'");
+  ofSystem("/usr/local/bin/qrencode -lH -m 1 -o " + outputPath + "/qr.png 'http://" + serverUrl + "/" + generateFilename + ".mp4'");
   ofSystem("lpr -o media=DC20 -o PageSize=DC20 -o fitplot " + outputPath + "/qr.png");
   setStatusMessage("Print process completed.");
 }
