@@ -25,10 +25,10 @@ public:
 
   ofVboMesh getBackground_STRIP();
   ofVboMesh getBackground_FAN();
-  void      loadPhoto();
   void      loadGara();
   void      loadHamon();
-  void      capture();
+  void      loadPhoto();
+  void      selectPhoto();
   void      generateGif();
   bool      uploadGif();
   void      printQr();
@@ -66,6 +66,7 @@ public:
   ofxDatGuiTextInput   *prefixTextInput;
   ofxDatGuiTextInput   *numberTextInput;
   ofxDatGuiButton      *loadButton;
+  ofxDatGuiButton      *selectButton;
   ofxDatGuiMatrix      *garaUpperMatrix;
   ofxDatGuiMatrix      *garaLowerMatrix;
   ofxDatGuiButton      *generateButton;
@@ -91,6 +92,7 @@ public:
   vector <ofImage>           hamonImages;
   int                        hamonNum;
   ofImage                    mojiImage;
+  ofDirectory                watchDirectory;
   ofDirectory                outputDirectory;
   string                     outputPath;
   ofDirectory                archiveDirectory;
