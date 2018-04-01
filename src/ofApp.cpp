@@ -565,6 +565,7 @@ void ofApp::printQr()
   setStatusMessage("Print process has been started.");
   ofSystem("/usr/local/bin/qrencode -lH -m 1 -o " + outputPath + "/qr.png 'http://" + serverUrl + "/" + generateFilename + ".mp4'");
   ofSystem("lpr -o media=DC20 -o PageSize=DC20 -o fitplot " + outputPath + "/qr.png");
+  ofSystem("echo " + prefix + ofToString(number, 3, '0') + " | lpr -o media=DC20 -o PageSize=DC20 -o fitplot");
   setStatusMessage("Print process completed.");
 }
 
