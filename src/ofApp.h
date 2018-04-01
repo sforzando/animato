@@ -29,6 +29,7 @@ public:
   void      loadHamon();
   void      loadPhoto();
   void      selectPhoto();
+  void      calculateAverageColor();
   void      generateGif();
   bool      uploadGif();
   void      printQr();

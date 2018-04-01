@@ -458,13 +458,16 @@ void ofApp::loadPhoto()
     if (ext == "png" || ext == "PNG" || ext == "jpg" || ext == "JPG") {
       pictureImage = ofImage((*it).getAbsolutePath());
       pictureImage.resize(pictureRectangle.width, pictureRectangle.height);
-      
+
+      calculateAverageColor();
+
       isPhotoLoaded         = true;
       isBackgroundGenerated = false;
       number++;
       numberTextInput->setText(ofToString(number, 3, '0'));
-      
+
       setStatusMessage("Loading photo completed.");
+
       return;
     }
   }
@@ -481,25 +484,7 @@ void ofApp::selectPhoto()
     pictureImage = ofImage(loadFileResult.getPath());
     pictureImage.resize(pictureRectangle.width, pictureRectangle.height);
 
-    // Calculate Average Color
-    float r = 0, g = 0, b = 0;
-    for (int w = 0; w < pictureWidth; w++) {
-      ofColor edgeColor = pictureImage.getColor(w, 0);
-      r += edgeColor.r;
-      g += edgeColor.g;
-      b += edgeColor.b;
-    }
-    for (int h = 0; h < pictureHeight; h++) {
-      ofColor edgeColor = pictureImage.getColor(0, h);
-      r += edgeColor.r;
-      g += edgeColor.g;
-      b += edgeColor.b;
-    }
-    r /= pictureWidth + pictureHeight;
-    g /= pictureWidth + pictureHeight;
-    b /= pictureWidth + pictureHeight;
-    averageColor.set(r, g, b);
-    averageColorPicker->setColor(averageColor);
+    calculateAverageColor();
 
     isPhotoLoaded         = true;
     isBackgroundGenerated = false;
@@ -508,6 +493,28 @@ void ofApp::selectPhoto()
 
     setStatusMessage("Loading photo completed.");
   }
+}
+
+void ofApp::calculateAverageColor()
+{
+  float r = 0, g = 0, b = 0;
+  for (int w = 0; w < pictureWidth; w++) {
+    ofColor edgeColor = pictureImage.getColor(w, 0);
+    r += edgeColor.r;
+    g += edgeColor.g;
+    b += edgeColor.b;
+  }
+  for (int h = 0; h < pictureHeight; h++) {
+    ofColor edgeColor = pictureImage.getColor(0, h);
+    r += edgeColor.r;
+    g += edgeColor.g;
+    b += edgeColor.b;
+  }
+  r /= pictureWidth + pictureHeight;
+  g /= pictureWidth + pictureHeight;
+  b /= pictureWidth + pictureHeight;
+  averageColor.set(r, g, b);
+  averageColorPicker->setColor(averageColor);
 }
 
 void ofApp::generateGif()
